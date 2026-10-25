@@ -5,10 +5,8 @@ import { SUPPORT_LABELS } from "@/lib/assumptions";
 import { fmtPct } from "@/lib/format";
 import type { SimulationRun } from "@/lib/scoring/simulate";
 import type { Tier } from "@/lib/types";
-import { Card } from "@/components/shell/ui";
+import { Card, useThemeColors } from "@/components/shell/ui";
 
-const BEFORE = "#7d8ea3";
-const AFTER = "#5eead4";
 
 /** Expected completion with and without the selected supports, overall and by baseline tier. */
 export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; children?: React.ReactNode }) {
@@ -29,6 +27,7 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
     })
     .filter((d): d is NonNullable<typeof d> => d !== null);
   const r = sim.result;
+  const c = useThemeColors();
   const afterLabel = r.supports.length ? "With selected supports" : "With supports (none selected)";
 
   return (
@@ -54,20 +53,20 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
         <div style={{ height: 320 }} aria-hidden>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 28, right: 8, left: 0, bottom: 0 }} barGap={6}>
-              <CartesianGrid stroke="#2c3a4c" vertical={false} />
-              <XAxis dataKey="name" tick={{ fill: "#eef3f8", fontSize: 14 }} axisLine={{ stroke: "#2c3a4c" }} tickLine={false} interval={0} />
-              <YAxis domain={[0, 100]} unit="%" tick={{ fill: "#b3c0cf", fontSize: 13 }} axisLine={false} tickLine={false} width={52} />
+              <CartesianGrid stroke={c.line} vertical={false} />
+              <XAxis dataKey="name" tick={{ fill: c.ink, fontSize: 14 }} axisLine={{ stroke: c.line }} tickLine={false} interval={0} />
+              <YAxis domain={[0, 100]} unit="%" tick={{ fill: c.muted, fontSize: 13 }} axisLine={false} tickLine={false} width={52} />
               <Tooltip
                 cursor={{ fill: "rgba(255,255,255,0.05)" }}
                 formatter={(v) => `${v}%`}
-                contentStyle={{ background: "#1a2330", border: "1px solid #2c3a4c", borderRadius: 8, color: "#eef3f8" }}
+                contentStyle={{ background: c["surface-2"], border: `1px solid ${c.line}`, borderRadius: 8, color: c.ink }}
               />
-              <Legend wrapperStyle={{ color: "#eef3f8", fontSize: 15 }} />
-              <Bar dataKey="before" name="Without supports" fill={BEFORE} radius={[4, 4, 0, 0]}>
-                <LabelList dataKey="before" position="top" fill="#eef3f8" fontSize={14} formatter={(v) => `${v}%`} />
+              <Legend wrapperStyle={{ color: c.ink, fontSize: 15 }} />
+              <Bar dataKey="before" name="Without supports" fill={c.baseline} radius={[4, 4, 0, 0]}>
+                <LabelList dataKey="before" position="top" fill={c.ink} fontSize={14} formatter={(v) => `${v}%`} />
               </Bar>
-              <Bar dataKey="after" name={afterLabel} fill={AFTER} radius={[4, 4, 0, 0]}>
-                <LabelList dataKey="after" position="top" fill="#eef3f8" fontSize={14} formatter={(v) => `${v}%`} />
+              <Bar dataKey="after" name={afterLabel} fill={c.accent} radius={[4, 4, 0, 0]}>
+                <LabelList dataKey="after" position="top" fill={c.ink} fontSize={14} formatter={(v) => `${v}%`} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

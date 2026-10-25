@@ -3,20 +3,22 @@
 import { useState } from "react";
 import { BARRIER_LABELS } from "@/lib/assumptions";
 import { fmtMaybe, frictionLabel, frictionLevel } from "@/lib/format";
-import type { Cell, ScoreResult } from "@/lib/types";
+import type { ScoreResult } from "@/lib/types";
 import { Card } from "@/components/shell/ui";
 
 const TOP_N = 25;
 
 /** Top 25 patients by need x scored visits. Each cell has an icon and number, so color is never the only signal. */
 export function BarrierHeatmap({ score }: { score: ScoreResult }) {
-  const [focus, setFocus] = useState<Cell | null>(null);
+  // Keyed, not the Cell object: every toggle or assumption change rebuilds the matrix.
+  const [focusKey, setFocusKey] = useState<string | null>(null);
   const top = score.patients.slice(0, TOP_N);
   const visits = score.scoredVisits;
   const cells = new Map(score.matrix.map((c) => [`${c.patientId}|${c.visitId}`, c]));
+  const focus = focusKey ? cells.get(focusKey) ?? null : null;
 
   return (
-    <Card title="Barrier heatmap" subtitle={`Friction at each visit for the ${top.length} patients who need the most support. Icon shows the main barrier.`}>
+    <Card title="Barrier heatmap" subtitle={`Friction at each visit for the ${top.length} patients who need the most support. First icon is the level, second is the main barrier.`}>
       <div className="overflow-x-auto">
         <table className="border-separate border-spacing-1">
           <caption className="sr-only">Friction per patient and visit</caption>
@@ -44,7 +46,8 @@ export function BarrierHeatmap({ score }: { score: ScoreResult }) {
                   <span className="block text-xs font-normal text-info">◆ SYNTHETIC</span>
                 </th>
                 {visits.map((v) => {
-                  const c = cells.get(`${p.patientId}|${v.id}`);
+                  const key = `${p.patientId}|${v.id}`;
+                  const c = cells.get(key);
                   if (!c) return <td key={v.id} />;
                   const level = frictionLevel(c.friction);
                   const lab = frictionLabel[level];
@@ -53,13 +56,16 @@ export function BarrierHeatmap({ score }: { score: ScoreResult }) {
                     <td key={v.id} className="p-0">
                       <button
                         type="button"
-                        onClick={() => setFocus(c)}
-                        onFocus={() => setFocus(c)}
-                        onMouseEnter={() => setFocus(c)}
+                        onClick={() => setFocusKey(key)}
+                        onFocus={() => setFocusKey(key)}
+                        onMouseEnter={() => setFocusKey(key)}
                         aria-label={`${p.patientId}, ${v.label}: ${lab.word} friction ${c.friction.toFixed(2)}${main ? `, mainly ${main.label}` : ""}`}
-                        className={`flex h-12 w-full min-w-16 flex-col items-center justify-center rounded-md border text-xs font-semibold ${lab.cls} ${focus === c ? "ring-2 ring-ink" : ""}`}
+                        className={`flex h-12 w-full min-w-16 flex-col items-center justify-center rounded-md border text-xs font-semibold ${lab.cls} ${focusKey === key ? "ring-2 ring-ink" : ""}`}
                       >
-                        <span aria-hidden className="text-sm leading-none">{main ? main.icon : lab.icon}</span>
+                        <span aria-hidden className="flex items-center gap-1 text-sm leading-none">
+                          {lab.icon}
+                          {main && <span>{main.icon}</span>}
+                        </span>
                         <span className="tabular-nums">{c.friction.toFixed(2)}</span>
                       </button>
                     </td>
@@ -79,7 +85,7 @@ export function BarrierHeatmap({ score }: { score: ScoreResult }) {
           </span>
         ))}
         <span className="text-muted">
-          Icons: {Object.values(BARRIER_LABELS).map((b) => `${b.icon} ${b.label}`).join(" · ")}
+          Second icon is the main barrier: {Object.values(BARRIER_LABELS).map((b) => `${b.icon} ${b.label}`).join(" · ")}
         </span>
       </div>
 

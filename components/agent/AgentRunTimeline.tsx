@@ -59,7 +59,7 @@ export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
         {run.status === "running" ? (last?.kind === "step" ? `${TOOL_LABEL[last.step.tool]}: ${last.step.status}` : "Agent is thinking") : run.stop?.message}
       </p>
 
-      <Card>
+      <Card title="Steps">
         {run.items.length === 0 && <p className="text-muted">◌ Waiting for the agent&apos;s first step…</p>}
         <ol className="relative">
           {run.items.map((it, i) => {

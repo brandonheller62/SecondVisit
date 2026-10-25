@@ -5,7 +5,7 @@ import { fmtPct, TOO_SMALL } from "@/lib/format";
 import { MIN_GROUP_SIZE } from "@/lib/scoring/simulate";
 import type { GroupBy, GroupSummary } from "@/lib/types";
 import { GROUP_BYS } from "@/lib/types";
-import { Card } from "@/components/shell/ui";
+import { Card, Chip } from "@/components/shell/ui";
 
 const LABEL: Record<GroupBy, string> = {
   preferredLanguage: "Language",
@@ -13,6 +13,11 @@ const LABEL: Record<GroupBy, string> = {
   transport: "Transport",
   insurance: "Insurance",
 };
+
+function signedPts(delta: number) {
+  const pts = Math.round(delta * 100);
+  return `${pts > 0 ? "+" : pts < 0 ? "−" : "±"}${Math.abs(pts)} pts`;
+}
 
 /** Group reporting only. Neighborhood and language never feed the score. */
 export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }) {
@@ -23,23 +28,16 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
       title="By group"
       subtitle={`Expected completion without and with the selected supports. Groups under ${MIN_GROUP_SIZE} people are not shown.`}
       actions={
-        <div role="tablist" aria-label="Group by" className="flex flex-wrap gap-1">
+        <div role="group" aria-label="Group by" className="flex flex-wrap gap-1">
           {GROUP_BYS.map((k) => (
-            <button
-              key={k}
-              type="button"
-              role="tab"
-              aria-selected={by === k}
-              onClick={() => setBy(k)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${by === k ? "bg-accent text-accent-ink" : "border border-line bg-surface-2 hover:border-muted"}`}
-            >
+            <Chip key={k} pressed={by === k} onClick={() => setBy(k)}>
               {LABEL[k]}
-            </button>
+            </Chip>
           ))}
         </div>
       }
     >
-      <div className="overflow-x-auto" role="tabpanel">
+      <div className="overflow-x-auto">
         <table className="w-full min-w-[520px] text-left">
           <caption className="sr-only">Completion by {LABEL[by].toLowerCase()}</caption>
           <thead className="text-sm text-muted">
@@ -62,7 +60,7 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
                     <td className="py-2 pr-3 tabular-nums">{r.n}</td>
                     <td className="py-2 pr-3 tabular-nums">{fmtPct(r.completionBefore!)}</td>
                     <td className="py-2 pr-3 tabular-nums text-accent">{fmtPct(r.completionAfter!)}</td>
-                    <td className="py-2 tabular-nums">+{Math.round((r.completionAfter! - r.completionBefore!) * 100)} pts</td>
+                    <td className="py-2 tabular-nums">{signedPts(r.completionAfter! - r.completionBefore!)}</td>
                   </>
                 )}
               </tr>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BARRIER_LABELS, SUPPORT_LABELS } from "@/lib/assumptions";
 import { fmtMoney, fmtPct, tierStyle } from "@/lib/format";
 import type { PatientScore, Tier } from "@/lib/types";
-import { Badge, Button, Card, SyntheticTag } from "@/components/shell/ui";
+import { Badge, Button, Card, Chip, SyntheticTag } from "@/components/shell/ui";
 
 const FILTERS: (Tier | "All")[] = ["All", "High", "Medium", "Low"];
 const PAGE = 15;
@@ -16,6 +16,7 @@ export function SupportList({ patients }: { patients: PatientScore[] }) {
   const rows = filter === "All" ? patients : patients.filter((p) => p.tier === filter);
   const counts = { All: patients.length, High: 0, Medium: 0, Low: 0 } as Record<Tier | "All", number>;
   for (const p of patients) counts[p.tier]++;
+  const rank = new Map(patients.map((p, i) => [p.patientId, i + 1]));
 
   return (
     <Card
@@ -24,18 +25,16 @@ export function SupportList({ patients }: { patients: PatientScore[] }) {
       actions={
         <div role="group" aria-label="Filter by tier" className="flex flex-wrap gap-1">
           {FILTERS.map((f) => (
-            <button
+            <Chip
               key={f}
-              type="button"
-              aria-pressed={filter === f}
+              pressed={filter === f}
               onClick={() => {
                 setFilter(f);
                 setShown(PAGE);
               }}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${filter === f ? "bg-accent text-accent-ink" : "border border-line bg-surface-2 hover:border-muted"}`}
             >
               {f} ({counts[f]})
-            </button>
+            </Chip>
           ))}
         </div>
       }
@@ -55,7 +54,7 @@ export function SupportList({ patients }: { patients: PatientScore[] }) {
           <tbody>
             {rows.slice(0, shown).map((p) => (
               <tr key={p.patientId} className="border-b border-line/60 align-top">
-                <td className="py-3 pr-3 tabular-nums text-muted">{patients.indexOf(p) + 1}</td>
+                <td className="py-3 pr-3 tabular-nums text-muted">{rank.get(p.patientId)}</td>
                 <td className="py-3 pr-3">
                   <div className="font-mono font-semibold">{p.patientId}</div>
                   <SyntheticTag />
