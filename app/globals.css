@@ -17,6 +17,7 @@
   --color-bad: #fb7185;
   --color-baseline: #7d8ea3;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -83,5 +84,88 @@ input[type="range"] {
   .tm-fade {
     transition-property: opacity !important;
     transition-duration: 200ms !important;
+  }
+}
+
+/* Page-load caduceus intro (components/shell/IntroSplash.tsx). One predetermined
+   sequence, so plain CSS keyframes: staff draws, snakes wind up it, wings open,
+   the wordmark rises, then the overlay fades. About 1.5s end to end. */
+.tm-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 50; /* above the sticky header (z-30) */
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1.25rem;
+  background: var(--color-bg);
+  cursor: pointer;
+  animation: tm-intro-out 300ms var(--ease-out) 1250ms forwards;
+}
+
+.tm-intro-mark {
+  width: 9rem;
+  height: 9rem;
+  color: var(--color-accent);
+}
+
+.tm-intro-mark path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.tm-staff {
+  animation: tm-draw 400ms var(--ease-out) both;
+}
+
+.tm-snake {
+  animation: tm-draw 600ms var(--ease-in-out) 200ms both;
+}
+
+.tm-wings {
+  animation: tm-draw 450ms var(--ease-out) 650ms both;
+}
+
+.tm-intro-word {
+  animation: tm-rise 300ms var(--ease-out) 750ms both;
+}
+
+@keyframes tm-draw {
+  /* Hidden until its turn, so round line caps don't show as dots during the delay. */
+  from {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes tm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tm-intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Reduced motion: no intro at all. */
+@media (prefers-reduced-motion: reduce) {
+  .tm-intro {
+    display: none;
   }
 }
