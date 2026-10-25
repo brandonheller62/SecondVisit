@@ -13,9 +13,10 @@
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { NCT_PATTERN } from "../nct";
 import type { TrialInfo } from "../types";
 
-export const NCT_PATTERN = /^NCT\d{8}$/;
+
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Study = { protocolSection?: any };

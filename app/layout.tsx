@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Trial Mirror",
-  description: "Test a clinical trial's visit burden against a synthetic Miami population.",
+  description: "Retention-support agent: ranks which already-eligible trial participants need the most support to stay in a trial.",
 };
 
 export default function RootLayout({

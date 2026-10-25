@@ -1,96 +1,92 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getAgentRun } from "@/lib/api";
-import type { AgentStepStatus, Trial } from "@/lib/types";
-import { useApi } from "@/lib/useApi";
+import type { RunStopReason, ToolName } from "@/lib/types";
 import { Badge, Button, Card } from "@/components/shell/ui";
 import { ToolCallPanel } from "./ToolCallPanel";
+import type { RunState, RunStep } from "./useAgentRun";
 
-const STEP_MS = 1300;
-
-const statusUi: Record<AgentStepStatus | "waiting", { icon: string; word: string; ring: string; tone: "neutral" | "info" | "ok" | "warn" }> = {
-  pending: { icon: "○", word: "Pending", ring: "border-line text-muted", tone: "neutral" },
-  running: { icon: "◌", word: "Running", ring: "border-info text-info animate-pulse", tone: "info" },
-  done: { icon: "✓", word: "Done", ring: "border-ok bg-ok/15 text-ok", tone: "ok" },
-  waiting: { icon: "⏸", word: "Waiting for CHW", ring: "border-warn bg-warn/15 text-warn", tone: "warn" },
+const TOOL_LABEL: Record<ToolName, string> = {
+  fetch_trial: "Fetch trial from ClinicalTrials.gov",
+  extract_visit_schedule: "Extract visit schedule",
+  parse_patients: "Validate patient file",
+  score_patients: "Score friction per patient and visit",
+  simulate_supports: "Simulate supports",
+  summarize_groups: "Summarize by group",
+  draft_documents: "Draft documents",
 };
 
-/**
- * Replays a finished agent run one step at a time. `runKey` changes each time
- * "Analyze" is clicked so the animation restarts.
- */
-export function AgentRunTimeline({ trial, runKey, onOpen }: {
-  trial: Trial;
-  runKey: number;
-  onOpen: (tab: "coordinator" | "chw") => void;
+const statusUi: Record<RunStep["status"], { icon: string; word: string; ring: string; tone: "info" | "ok" | "bad" }> = {
+  running: { icon: "◌", word: "Running", ring: "border-info text-info animate-pulse", tone: "info" },
+  done: { icon: "✓", word: "Done", ring: "border-ok bg-ok/15 text-ok", tone: "ok" },
+  error: { icon: "!", word: "Error", ring: "border-bad bg-bad/15 text-bad", tone: "bad" },
+};
+
+const stopUi: Record<RunStopReason, { tone: "ok" | "warn" | "bad"; title: string }> = {
+  approval_gate: { tone: "warn", title: "⏸ Waiting for human approval" },
+  needs_schedule: { tone: "warn", title: "Visit schedule needed" },
+  finished: { tone: "ok", title: "Finished" },
+  iteration_cap: { tone: "bad", title: "Stopped at the 12-step limit" },
+  refusal: { tone: "bad", title: "The model declined" },
+  error: { tone: "bad", title: "Run failed" },
+};
+
+const stopBorder = { ok: "border-ok/60", warn: "border-warn/60", bad: "border-bad/60" };
+
+/** Live timeline of the real steps the agent took, in the order they streamed in. */
+export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
+  run: RunState;
+  onCancel: () => void;
+  onOpen: (tab: "results" | "drafts") => void;
+  onPasteSchedule: () => void;
 }) {
-  const steps = useApi(() => getAgentRun(trial.id), [trial.id]);
-  const [revealed, setRevealed] = useState(0);
-
-  useEffect(() => setRevealed(0), [runKey, trial.id]);
-
-  useEffect(() => {
-    if (!steps || revealed >= steps.length - 1) return;
-    const t = setTimeout(() => setRevealed((r) => r + 1), STEP_MS);
-    return () => clearTimeout(t);
-  }, [steps, revealed]);
-
-  if (!steps) return null;
-  const finished = revealed >= steps.length - 1;
-
+  const last = run.items.at(-1);
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold">Agent run</h1>
           <p className="mt-1 text-lg text-muted">
-            {trial.id} · {trial.shortTitle}
+            {run.trial ? `${run.trial.nctId} · ${run.trial.title}` : "Starting…"}
           </p>
+          {run.trial?.source === "cache" && (
+            <p className="mt-2 text-warn">⚠ {run.trial.sourceNote}</p>
+          )}
         </div>
-        <p className="sr-only" aria-live="polite">
-          {steps[revealed].label}: {finished ? "waiting for CHW approval" : "running"}
-        </p>
-        {!finished && (
-          <Button onClick={() => setRevealed(steps.length - 1)}>Skip to end</Button>
-        )}
+        {run.status === "running" && <Button onClick={onCancel}>Cancel</Button>}
       </div>
 
+      <p className="sr-only" aria-live="polite">
+        {run.status === "running" ? (last?.kind === "step" ? `${TOOL_LABEL[last.step.tool]}: ${last.step.status}` : "Agent is thinking") : run.stop?.message}
+      </p>
+
       <Card>
+        {run.items.length === 0 && <p className="text-muted">◌ Waiting for the agent&apos;s first step…</p>}
         <ol className="relative">
-          {steps.map((step, i) => {
-            const status: AgentStepStatus | "waiting" =
-              i < revealed ? "done" : i === revealed ? (i === steps.length - 1 ? "waiting" : "running") : "pending";
-            const ui = statusUi[status];
-            const shown = status !== "pending";
+          {run.items.map((it, i) => {
+            const lastItem = i === run.items.length - 1;
+            if (it.kind === "message") {
+              return (
+                <li key={it.id} className="relative flex gap-4 pb-5 last:pb-0">
+                  {!lastItem && <span aria-hidden className="absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-0.5 bg-line" />}
+                  <span aria-hidden className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-line text-sm text-muted">AI</span>
+                  <p className="pt-2 text-muted italic">{it.text}</p>
+                </li>
+              );
+            }
+            const s = it.step;
+            const ui = statusUi[s.status];
             return (
-              <li key={step.id} className="relative flex gap-4 pb-6 last:pb-0">
-                {i < steps.length - 1 && (
-                  <span
-                    aria-hidden
-                    className={`absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-0.5 transition-colors duration-500 ${
-                      i < revealed ? "bg-ok/60" : "bg-line"
-                    }`}
-                  />
-                )}
-                <span
-                  aria-hidden
-                  className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-lg font-bold transition-all duration-500 ${ui.ring}`}
-                >
-                  {ui.icon}
-                </span>
+              <li key={s.id} className="relative flex gap-4 pb-6 last:pb-0 animate-[fadein_300ms_ease-out]">
+                {!lastItem && <span aria-hidden className={`absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-0.5 ${s.status === "done" ? "bg-ok/60" : "bg-line"}`} />}
+                <span aria-hidden className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-lg font-bold ${ui.ring}`}>{ui.icon}</span>
                 <div className="min-w-0 flex-1 pt-1">
                   <div className="flex flex-wrap items-center gap-3">
-                    <h3 className={`text-lg font-semibold ${shown ? "" : "text-muted"}`}>{step.label}</h3>
+                    <h3 className="text-lg font-semibold">{TOOL_LABEL[s.tool]}</h3>
                     <Badge tone={ui.tone}>{ui.word}</Badge>
+                    <span className="text-xs text-muted">step {s.id.slice(1)} · turn {s.iteration}</span>
                   </div>
-                  {status === "running" && <p className="mt-1 text-muted">Working…</p>}
-                  {(status === "done" || status === "waiting") && (
-                    <div className="animate-[fadein_400ms_ease-out]">
-                      <p className="mt-1">{step.summary}</p>
-                      {step.toolCall && <ToolCallPanel call={step.toolCall} />}
-                    </div>
-                  )}
+                  <p className={`mt-1 ${s.status === "error" ? "text-bad" : ""}`}>{s.summary}</p>
+                  <ToolCallPanel tool={s.tool} input={s.input} output={s.output} />
                 </div>
               </li>
             );
@@ -98,11 +94,18 @@ export function AgentRunTimeline({ trial, runKey, onOpen }: {
         </ol>
       </Card>
 
-      {finished && (
-        <div className="flex flex-wrap gap-3">
-          <Button variant="primary" onClick={() => onOpen("coordinator")}>Open coordinator view →</Button>
-          <Button variant="primary" onClick={() => onOpen("chw")}>Open CHW review →</Button>
-        </div>
+      {run.stop && (
+        <Card className={stopBorder[stopUi[run.stop.reason].tone]}>
+          <div role="status">
+            <h2 className="text-xl font-semibold">{stopUi[run.stop.reason].title}</h2>
+            <p className="mt-1">{run.stop.message}</p>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {run.stop.reason === "needs_schedule" && <Button variant="primary" onClick={onPasteSchedule}>Paste visit schedule →</Button>}
+            {run.schedule?.scheduleFound && <Button variant="primary" onClick={() => onOpen("results")}>Open results →</Button>}
+            {run.drafts && <Button variant="primary" onClick={() => onOpen("drafts")}>Review drafts →</Button>}
+          </div>
+        </Card>
       )}
     </div>
   );

@@ -52,6 +52,30 @@ export function SyntheticTag() {
   );
 }
 
+/** On/off switch with a visible state word, so state never relies on color. */
+export function Toggle({ checked, onChange, label, hint }: { checked: boolean; onChange: (v: boolean) => void; label: ReactNode; hint?: ReactNode }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition ${
+        checked ? "border-accent bg-accent/10" : "border-line bg-surface-2 hover:border-muted"
+      }`}
+    >
+      <span aria-hidden className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? "bg-accent" : "bg-line"}`}>
+        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-ink transition-all ${checked ? "left-[22px]" : "left-0.5"}`} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-medium">{label}</span>
+        {hint && <span className="block text-sm text-muted">{hint}</span>}
+      </span>
+      <span className={`text-xs font-bold uppercase ${checked ? "text-accent" : "text-muted"}`}>{checked ? "On" : "Off"}</span>
+    </button>
+  );
+}
+
 export function Button({ children, variant = "secondary", className = "", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary";
 }) {

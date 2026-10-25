@@ -9,8 +9,9 @@ export interface Assumptions {
   /**
    * Per-visit weight w_k for each barrier term. Friction compounds across
    * visits (P(complete) = product of (1 - f)), so per-visit weights are small:
-   * a barrier that hits all 8 visits of a trial at w = 0.1 alone gives
-   * risk = 1 - 0.9^8 = 0.57.
+   * a barrier that hits all 8 visits of a trial at w = 0.06 alone gives
+   * risk = 1 - 0.94^8 = 0.39. Tuned so a 4-8 visit trial gives retention in the
+   * range trials usually report; more visits means more exposure and higher risk.
    */
   weights: Record<BarrierKey, number>;
   /** Off by default: past missed appointments can encode poverty, shift work and transit gaps rather than intent. */
@@ -79,25 +80,25 @@ export const DEFAULT_ASSUMPTIONS: Assumptions = {
   weights: {
     // Visit timing is the barrier participants name most often in retention
     // studies; a morning fasting visit after a night shift is the sharpest case.
-    scheduleClash: 0.15,
+    scheduleClash: 0.06,
     // Long transit trips repeat every visit; weighted a bit lower than a clash
     // because people can sometimes borrow a ride.
-    transport: 0.1,
+    transport: 0.04,
     // Out-of-pocket cost relative to budget; fares and lost pay add up per visit.
-    cost: 0.1,
+    cost: 0.04,
     // No childcare for under-6s makes multi-hour visits hard to attend at all.
-    childcare: 0.1,
+    childcare: 0.04,
     // A materials gap in the trial (not a trait of the person): consent forms,
     // questionnaires and reminders the person cannot read.
-    languageAccess: 0.08,
+    languageAccess: 0.03,
     // Hits only the visit in the closure week, so it can be large.
-    storm: 0.5,
+    storm: 0.3,
     // Kept small and off by default because it can encode socioeconomic bias.
-    missedPrior: 0.03,
+    missedPrior: 0.01,
   },
   missedPriorEnabled: false,
   mediumLevel: 0.5,
-  tiers: { high: 0.45, medium: 0.2 },
+  tiers: { high: 0.35, medium: 0.15 },
   unitCosts: {
     busFareOneWay: 2.25,
     mileageRatePerMile: 0.7,

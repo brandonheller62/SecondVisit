@@ -1,64 +1,114 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AgentRunTimeline } from "@/components/agent/AgentRunTimeline";
-import { ChwView } from "@/components/chw/ChwView";
-import { CoordinatorView } from "@/components/coordinator/CoordinatorView";
+import { useAgentRun } from "@/components/agent/useAgentRun";
+import { DraftsView } from "@/components/drafts/DraftsView";
+import { ResultsView } from "@/components/results/ResultsView";
 import { SafetyBanner } from "@/components/shell/SafetyBanner";
 import { TopNav, type Tab } from "@/components/shell/TopNav";
-import { TrialPicker } from "@/components/shell/TrialPicker";
-import { DEFAULT_SCENARIO, getDefaultAssumptions } from "@/lib/api";
-import type { Assumptions, Scenario, Trial } from "@/lib/types";
-import { useApi } from "@/lib/useApi";
+import { StartPanel, type PatientFile } from "@/components/start/StartPanel";
+import { cloneAssumptions, type Assumptions } from "@/lib/assumptions";
+import { NCT_PATTERN } from "@/lib/nct";
+import { parsePatients } from "@/lib/scoring/parsePatients";
+import { allSupports, BASELINE, scorePatients } from "@/lib/scoring/score";
+import type { Approval, Draft, Scenario } from "@/lib/types";
 
 export default function Home() {
-  const [tab, setTab] = useState<Tab>("trial");
-  const [trial, setTrial] = useState<Trial | null>(null);
-  const [runKey, setRunKey] = useState(0);
-  const [scenario, setScenario] = useState<Scenario>(DEFAULT_SCENARIO);
-  const defaults = useApi(getDefaultAssumptions, []);
-  const [edited, setEdited] = useState<Assumptions | null>(null);
-  const assumptions = edited ?? defaults;
+  const [tab, setTab] = useState<Tab>("start");
+  const [nctId, setNctId] = useState("");
+  const [file, setFile] = useState<PatientFile | null>(null);
+  const [protocolText, setProtocolText] = useState("");
+  const [showProtocol, setShowProtocol] = useState(false);
+  const [assumptions, setAssumptions] = useState<Assumptions>(() => cloneAssumptions());
+  const [scenario, setScenario] = useState<Scenario>(BASELINE);
+  const [drafts, setDrafts] = useState<Draft[] | null>(null);
+  const [approval, setApproval] = useState<Approval | null>(null);
+  const { state: run, start, cancel } = useAgentRun();
 
-  function analyze(t: Trial) {
-    if (t.id !== trial?.id) setScenario(DEFAULT_SCENARIO);
-    setTrial(t);
-    setRunKey((k) => k + 1);
+  const nctValid = NCT_PATTERN.test(nctId.trim().toUpperCase());
+  const patients = file?.parse.ok ? file.parse.patients : null;
+  const schedule = run.schedule?.scheduleFound ? run.schedule : null;
+
+  // Adopt what the agent chose, so the results open on the agent's simulation.
+  useEffect(() => {
+    if (run.simulation) setScenario({ supports: allSupports(run.simulation.supports), stormWeek: run.simulation.stormWeek });
+  }, [run.simulation]);
+  useEffect(() => {
+    setDrafts(run.drafts);
+    setApproval(null);
+  }, [run.drafts]);
+  useEffect(() => {
+    if (run.stop?.reason === "needs_schedule") setShowProtocol(true);
+  }, [run.stop]);
+
+  const ranked = useMemo(
+    () => (schedule && patients ? scorePatients(schedule, patients, assumptions, { ...BASELINE, stormWeek: scenario.stormWeek }).patients : []),
+    [schedule, patients, assumptions, scenario.stormWeek],
+  );
+
+  async function loadSample() {
+    const csv = await fetch("/api/sample-patients").then((r) => r.text());
+    setFile({ name: "synthetic_patients.csv (sample)", csv, parse: parsePatients(csv) });
+  }
+
+  async function upload(f: File) {
+    const csv = await f.text();
+    setFile({ name: f.name, csv, parse: parsePatients(csv) });
+  }
+
+  function runAgent() {
+    if (!file?.parse.ok) return;
+    setScenario(BASELINE);
+    start({ nctId: nctId.trim().toUpperCase(), csv: file.csv, protocolText: showProtocol && protocolText.trim() ? protocolText : undefined });
     setTab("run");
   }
 
+  const enabled: Record<Tab, boolean> = {
+    start: true,
+    run: run.status !== "idle",
+    results: Boolean(schedule && patients),
+    drafts: Boolean(drafts),
+  };
+
   return (
     <div className="min-h-screen">
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-ink">
+        Skip to content
+      </a>
       <div className="sticky top-0 z-30">
         <SafetyBanner />
-        <TopNav tab={tab} onTab={setTab} trial={trial} />
+        <TopNav tab={tab} onTab={setTab} enabled={enabled} subtitle={run.trial ? `${run.trial.nctId} · ${run.trial.title}` : undefined} />
       </div>
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        {/* Views stay mounted (just hidden) so CHW edits survive tab switches. */}
-        <div hidden={tab !== "trial"}>
-          <TrialPicker selected={trial} onAnalyze={analyze} />
-        </div>
-        {trial && assumptions && (
-          <>
-            <div hidden={tab !== "run"}>
-              <AgentRunTimeline trial={trial} runKey={runKey} onOpen={setTab} />
-            </div>
-            <div hidden={tab !== "coordinator"}>
-              <CoordinatorView trial={trial} scenario={scenario} assumptions={assumptions} />
-            </div>
-            <div hidden={tab !== "chw"}>
-              <ChwView
-                key={trial.id}
-                trial={trial}
-                scenario={scenario}
-                onScenario={setScenario}
-                assumptions={assumptions}
-                onAssumptions={setEdited}
-                defaultAssumptions={defaults!}
-              />
-            </div>
-          </>
+      <main id="main" className="mx-auto max-w-7xl px-4 py-8">
+        {tab === "start" && (
+          <StartPanel
+            nctId={nctId}
+            onNctId={setNctId}
+            nctValid={nctValid}
+            file={file}
+            onSample={loadSample}
+            onUpload={upload}
+            protocolText={protocolText}
+            onProtocolText={setProtocolText}
+            showProtocol={showProtocol}
+            onRun={runAgent}
+            running={run.status === "running"}
+          />
         )}
+        {tab === "run" && <AgentRunTimeline run={run} onCancel={cancel} onOpen={setTab} onPasteSchedule={() => setTab("start")} />}
+        {tab === "results" && schedule && patients && (
+          <ResultsView
+            trial={run.trial}
+            schedule={schedule}
+            patients={patients}
+            assumptions={assumptions}
+            onAssumptions={setAssumptions}
+            scenario={scenario}
+            onScenario={setScenario}
+          />
+        )}
+        {tab === "drafts" && drafts && <DraftsView drafts={drafts} onDrafts={setDrafts} approval={approval} onApproval={setApproval} ranked={ranked} />}
       </main>
     </div>
   );
