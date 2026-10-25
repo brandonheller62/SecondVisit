@@ -1,8 +1,11 @@
 "use client";
 
+import { Check, Copy, DownloadSimple } from "@phosphor-icons/react/dist/ssr";
+
 import { useState } from "react";
 import { BARRIER_LABELS, SUPPORT_LABELS } from "@/lib/assumptions";
 import type { Approval, Draft, PatientScore } from "@/lib/types";
+import { ico } from "@/components/shell/icons";
 import { Badge, Button, Card } from "@/components/shell/ui";
 import { ApprovalGate } from "./ApprovalGate";
 
@@ -12,7 +15,10 @@ const csvCell = (v: string | number) => {
 };
 
 function rankedCsv(patients: PatientScore[], approval: Approval): string {
-  const header = ["rank", "patient_id", "synthetic", "tier", "risk_of_leaving_without_support", "top_barriers", "recommended_supports"];
+  const header = [
+    "rank", "patient_id", "synthetic", "tier", "risk_of_leaving_without_support", "top_barriers", "recommended_supports",
+    "patient_travel_per_visit", "patient_lost_pay_per_visit", "patient_uninsured_per_visit", "patient_cost_per_visit", "patient_cost_all_visits",
+  ];
   const rows = patients.map((p, i) => [
     i + 1,
     p.patientId,
@@ -21,6 +27,11 @@ function rankedCsv(patients: PatientScore[], approval: Approval): string {
     p.risk.toFixed(3),
     p.topBarriers.map((b) => `${BARRIER_LABELS[b.key].label} (${b.visitLabel})`).join("; "),
     p.recommendedSupports.map((s) => SUPPORT_LABELS[s].label).join("; "),
+    p.visitCostBreakdown.travel,
+    p.visitCostBreakdown.lostWages,
+    p.visitCostBreakdown.outOfPocket,
+    p.costPerVisit,
+    p.totalCost,
   ]);
   const note = [`# Trial Mirror support list. SYNTHETIC data. Ranks who to offer support first; never use to exclude anyone. Approved by ${approval.reviewer} at ${approval.approvedAt}.`];
   return [note, header, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
@@ -63,9 +74,9 @@ export function DraftsView({ drafts, onDrafts, approval, onApproval, ranked }: {
       <ApprovalGate approval={approval} onApprove={onApproval}>
         {(enabled) => (
           <>
-            <Button disabled={!enabled} onClick={() => copy("all", all + footer)}>{copied === "all" ? "✓ Copied" : "⧉ Copy all drafts"}</Button>
+            <Button disabled={!enabled} onClick={() => copy("all", all + footer)}>{copied === "all" ? <><Check {...ico} /> Copied</> : <><Copy {...ico} /> Copy all drafts</>}</Button>
             <Button disabled={!enabled} onClick={() => approval && download("trial-mirror-support-list.csv", rankedCsv(ranked, approval), "text/csv")}>
-              ⤓ Download ranked support list (CSV)
+              <DownloadSimple {...ico} /> Download support list (CSV)
             </Button>
           </>
         )}
@@ -78,7 +89,7 @@ export function DraftsView({ drafts, onDrafts, approval, onApproval, ranked }: {
           actions={
             <div className="flex flex-wrap items-center gap-2">
               {d.needsNativeReview && <Badge tone="warn">Machine-drafted, needs native-speaker/CHW review</Badge>}
-              <Button disabled={!approval} onClick={() => copy(d.id, d.text + footer)}>{copied === d.id ? "✓ Copied" : "⧉ Copy text"}</Button>
+              <Button disabled={!approval} onClick={() => copy(d.id, d.text + footer)}>{copied === d.id ? <><Check {...ico} /> Copied</> : <><Copy {...ico} /> Copy text</>}</Button>
             </div>
           }
         >

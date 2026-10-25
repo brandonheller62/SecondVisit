@@ -147,6 +147,10 @@ export interface PatientScore {
   recommendedSupports: SupportKey[];
   /** Estimated out-of-pocket cost per in-person visit, before supports. */
   costPerVisit: number;
+  /** What an average visit costs the patient, by component, in dollars and cents, before supports. Parts sum to costPerVisit. */
+  visitCostBreakdown: { travel: number; lostWages: number; outOfPocket: number };
+  /** The patient's own cost across all scored visits, before supports. */
+  totalCost: number;
 }
 
 export interface ScoreResult {

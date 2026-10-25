@@ -42,8 +42,9 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Results</h1>
-        <p className="mt-1 text-lg text-muted">
-          {trial ? `${trial.nctId} · ${trial.title}` : ""} · {patients.length} synthetic patients · {sim.before.scoredVisits.length} scored visits
+        {trial && <p className="mt-1 max-w-[75ch] text-lg text-muted">{trial.nctId}: {trial.title}</p>}
+        <p className="mt-1 text-muted">
+          {patients.length} synthetic patients, {sim.before.scoredVisits.length} scored visits
         </p>
       </div>
 
@@ -51,7 +52,7 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
         <SupportToggles scenario={scenario} onScenario={onScenario} />
       </BeforeAfterChart>
 
-      <SupportList patients={sim.before.patients} />
+      <SupportList patients={sim.before.patients} visitCount={sim.before.scoredVisits.length} />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <GroupTable groups={groups} />

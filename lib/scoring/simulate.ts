@@ -3,7 +3,7 @@
 import type { Assumptions } from "../assumptions";
 import type { GroupBy, GroupSummary, Patient, ScoreResult, SimulationResult, SupportCost, SupportKey, VisitSchedule } from "../types";
 import { SUPPORT_KEYS } from "../types";
-import { allSupports, materialsLanguages, NO_SUPPORTS, scorePatients, visitCost } from "./score";
+import { allSupports, materialsLanguages, NO_SUPPORTS, scorePatients, supportCostFor } from "./score";
 
 /** Groups smaller than this are reported as "Too small to report". */
 export const MIN_GROUP_SIZE = 10;
@@ -46,30 +46,10 @@ export function supportCosts(schedule: Schedule, patients: Patient[], a: Assumpt
 
   return SUPPORT_KEYS.filter((k) => supports.includes(k)).map((k) => {
     const helped = before.patients.filter((s) => s.recommendedSupports.includes(k)).map((s) => byId.get(s.patientId)!);
-    let cost = 0;
-    switch (k) {
-      case "rideVouchers":
-        cost = helped.length * visits.length * sc.rideVoucherPerVisit;
-        break;
-      case "eveningVisits":
-        cost = helped.length * visits.length * sc.eveningVisitPerVisit;
-        break;
-      case "childcareStipend":
-        cost = helped.length * visits.length * sc.childcarePerVisit;
-        break;
-      case "interpreter": {
-        const missing = new Set(helped.map((p) => p.preferredLanguage.toLowerCase()).filter((l) => !langs.includes(l)));
-        cost = helped.length * visits.length * sc.interpreterPerVisit + missing.size * sc.translationPerLanguage;
-        break;
-      }
-      case "wageReimbursement":
-        for (const p of helped) {
-          for (const v of visits) {
-            const c = visitCost(p, v, a, NO_SUPPORTS);
-            cost += c.lostWages + c.outOfPocket + (p.transport === "own car" ? c.travel : 0);
-          }
-        }
-        break;
+    let cost = helped.reduce((sum, p) => sum + supportCostFor(p, k, visits, a), 0);
+    if (k === "interpreter") {
+      const missing = new Set(helped.map((p) => p.preferredLanguage.toLowerCase()).filter((l) => !langs.includes(l)));
+      cost += missing.size * sc.translationPerLanguage;
     }
     return { support: k, patientsHelped: helped.length, cost: Math.round(cost) };
   });

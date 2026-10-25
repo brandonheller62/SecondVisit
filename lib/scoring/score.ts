@@ -165,6 +165,31 @@ const BARRIER_TO_SUPPORT: Partial<Record<BarrierKey, SupportKey>> = {
 };
 
 /** Which supports address a patient's barriers, strongest first. */
+/**
+ * What one support costs the site for one patient across the scored visits.
+ * Only ever summed into site totals (supportCosts in simulate.ts). Support cost
+ * is deliberately never shown per patient: a price next to each person invites
+ * picking the cheapest people instead of supporting everyone who needs it.
+ */
+export function supportCostFor(p: Patient, k: SupportKey, visits: Visit[], a: Assumptions): number {
+  const sc = a.supportCosts;
+  switch (k) {
+    case "rideVouchers":
+      return visits.length * sc.rideVoucherPerVisit;
+    case "eveningVisits":
+      return visits.length * sc.eveningVisitPerVisit;
+    case "childcareStipend":
+      return visits.length * sc.childcarePerVisit;
+    case "interpreter":
+      return visits.length * sc.interpreterPerVisit;
+    case "wageReimbursement":
+      return visits.reduce((sum, v) => {
+        const c = visitCost(p, v, a, NO_SUPPORTS);
+        return sum + c.lostWages + c.outOfPocket + (p.transport === "own car" ? c.travel : 0);
+      }, 0);
+  }
+}
+
 function recommend(p: Patient, best: Map<BarrierKey, PatientBarrier>, visits: Visit[], a: Assumptions): SupportKey[] {
   const ranked = [...best.values()].sort((x, y) => y.contribution - x.contribution);
   const out: SupportKey[] = [];
@@ -207,15 +232,22 @@ export function scorePatients(schedule: Pick<VisitSchedule, "visits" | "material
       }
     }
     const risk = 1 - pComplete;
-    const visitCosts = visits.map((v) => visitCost(p, v, a, NO_SUPPORTS).total);
+    const costs = visits.map((v) => visitCost(p, v, a, NO_SUPPORTS));
+    const cents = (n: number) => Math.round(n * 100) / 100;
+    const avg = (pick: (c: (typeof costs)[number]) => number) => (costs.length ? cents(costs.reduce((s, c) => s + pick(c), 0) / costs.length) : 0);
+    const visitCostBreakdown = { travel: avg((c) => c.travel), lostWages: avg((c) => c.lostWages), outOfPocket: avg((c) => c.outOfPocket) };
+    const recommendedSupports = recommend(p, best, visits, a);
     scores.push({
       patientId: p.id,
       pComplete: round(pComplete),
       risk: round(risk),
       tier: tierFor(risk, a),
       topBarriers: [...best.values()].sort((x, y) => y.contribution - x.contribution).slice(0, 3),
-      recommendedSupports: recommend(p, best, visits, a),
-      costPerVisit: visitCosts.length ? Math.round(visitCosts.reduce((x, y) => x + y, 0) / visitCosts.length) : 0,
+      recommendedSupports,
+      // Kept to the cent so the parts, the per-visit total and the all-visits total add up on screen.
+      costPerVisit: cents(visitCostBreakdown.travel + visitCostBreakdown.lostWages + visitCostBreakdown.outOfPocket),
+      visitCostBreakdown,
+      totalCost: cents(costs.reduce((s, c) => s + c.total, 0)),
     });
   }
 

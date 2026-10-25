@@ -95,6 +95,18 @@ describe("scorePatients", () => {
   });
 });
 
+describe("per-patient costs", () => {
+  it("cost parts add up per visit", () => {
+    const r = parsePatients(readFileSync("data/synthetic_patients.csv", "utf8"));
+    if (!r.ok) throw new Error(r.error);
+    const sim = simulateSupports(schedule, r.patients, DEFAULT_ASSUMPTIONS, ["eveningVisits", "rideVouchers", "childcareStipend", "wageReimbursement"]);
+    for (const p of sim.before.patients) {
+      const b = p.visitCostBreakdown;
+      expect(b.travel + b.lostWages + b.outOfPocket).toBeCloseTo(p.costPerVisit, 2);
+    }
+  });
+});
+
 describe("parsePatients", () => {
   it("rejects files with identifying columns", () => {
     const r = parsePatients("patient_id,first_name,age\nSYN-1,Ana,40\n");
