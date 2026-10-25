@@ -64,9 +64,11 @@ export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
         <ol className="relative">
           {run.items.map((it, i) => {
             const lastItem = i === run.items.length - 1;
+            // Parallel tool calls arrive in the same turn; stagger them 50ms so they don't land as one block.
+            const sameTurn = it.kind === "step" ? run.items.slice(0, i).filter((x) => x.kind === "step" && x.step.iteration === it.step.iteration).length : 0;
             if (it.kind === "message") {
               return (
-                <li key={it.id} className="relative flex gap-4 pb-5 last:pb-0">
+                <li key={it.id} className="tm-enter relative flex gap-4 pb-5 last:pb-0">
                   {!lastItem && <span aria-hidden className="absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-0.5 bg-line" />}
                   <span aria-hidden className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-line text-sm text-muted">AI</span>
                   <p className="pt-2 text-muted italic">{it.text}</p>
@@ -76,16 +78,19 @@ export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
             const s = it.step;
             const ui = statusUi[s.status];
             return (
-              <li key={s.id} className="relative flex gap-4 pb-6 last:pb-0 animate-[fadein_300ms_ease-out]">
-                {!lastItem && <span aria-hidden className={`absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-0.5 ${s.status === "done" ? "bg-ok/60" : "bg-line"}`} />}
-                <span aria-hidden className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-lg font-bold ${ui.ring}`}>{ui.icon}</span>
+              <li key={s.id} className="tm-enter relative flex gap-4 pb-6 last:pb-0" style={sameTurn ? { transitionDelay: `${sameTurn * 50}ms` } : undefined}>
+                {!lastItem && <span aria-hidden className={`absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-0.5 transition-colors duration-200 ${s.status === "done" ? "bg-ok/60" : "bg-line"}`} />}
+                <span aria-hidden className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-lg font-bold transition-colors duration-200 ${ui.ring}`}>
+                  {/* Keyed by status so the new glyph mounts and pops in when the step finishes. */}
+                  <span key={s.status} className="tm-pop">{ui.icon}</span>
+                </span>
                 <div className="min-w-0 flex-1 pt-1">
                   <div className="flex flex-wrap items-center gap-3">
                     <h3 className="text-lg font-semibold">{TOOL_LABEL[s.tool]}</h3>
                     <Badge tone={ui.tone}>{ui.word}</Badge>
                     <span className="text-xs text-muted">step {s.id.slice(1)} · turn {s.iteration}</span>
                   </div>
-                  <p className={`mt-1 ${s.status === "error" ? "text-bad" : ""}`}>{s.summary}</p>
+                  <p key={s.status} className={`tm-fade mt-1 ${s.status === "error" ? "text-bad" : ""}`}>{s.summary}</p>
                   <ToolCallPanel tool={s.tool} input={s.input} output={s.output} />
                 </div>
               </li>
@@ -95,7 +100,7 @@ export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
       </Card>
 
       {run.stop && (
-        <Card className={stopBorder[stopUi[run.stop.reason].tone]}>
+        <Card className={`tm-enter ${stopBorder[stopUi[run.stop.reason].tone]}`}>
           <div role="status">
             <h2 className="text-xl font-semibold">{stopUi[run.stop.reason].title}</h2>
             <p className="mt-1">{run.stop.message}</p>
