@@ -48,21 +48,8 @@ export function StartPanel({ nctId, onNctId, file, onSample, onUpload, onRun, ru
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title="1. Trial">
-          <label htmlFor="nct" className="text-sm font-medium text-muted">NCT ID</label>
-          <input
-            id="nct"
-            value={nctId}
-            onChange={(e) => onNctId(e.target.value)}
-            placeholder="NCT00000000"
-            spellCheck={false}
-            className="mt-1 w-full rounded-md border border-border bg-bg px-3 py-3 font-mono text-xl uppercase tracking-wide"
-            aria-invalid={nctId !== "" && !nctValid}
-            aria-describedby="nct-help"
-          />
-          <p id="nct-help" className={`mt-1 text-sm ${nctId && !nctValid ? "text-bad" : "text-muted"}`}>
-            {nctId && !nctValid ? "Use NCT followed by 8 digits." : "Any ClinicalTrials.gov ID, or pick a demo below."}
-          </p>
-          <div className="mt-4 grid gap-3">
+          {/* Only the demo trials for now: there is no patient data for other trials yet. */}
+          <div className="grid gap-3" role="group" aria-label="Demo trials">
             {DEMO_TRIALS.map((t) => {
               const active = nctId.trim().toUpperCase() === t.nctId;
               return (
