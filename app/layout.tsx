@@ -18,7 +18,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Trial Mirror",
+  title: "Second Visit",
   description: "Retention-support agent: ranks which already-eligible trial participants need the most support to stay in a trial.",
 };
 

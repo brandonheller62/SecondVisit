@@ -20,7 +20,7 @@ export function TopNav({ tab, onTab, enabled, subtitle }: {
       <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-1.5 sm:gap-6 sm:py-2">
         <div className="flex shrink-0 items-baseline gap-3 lg:min-w-0 lg:flex-1 lg:shrink">
           <span className="shrink-0 whitespace-nowrap text-lg font-bold tracking-tight sm:text-2xl">
-            Trial Mirror
+            Second Visit
           </span>
           {subtitle && (
             <span className="hidden min-w-0 truncate text-sm text-muted md:block" title={subtitle}>

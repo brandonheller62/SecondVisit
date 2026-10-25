@@ -1,4 +1,4 @@
-// Shared types for Trial Mirror. The agent route, the scoring code and the UI
+// Shared types for Second Visit. The agent route, the scoring code and the UI
 // all speak these shapes. Change only by announcement (see README).
 
 /** A value the source did not state. Shown as "unknown" in the UI, never guessed. */

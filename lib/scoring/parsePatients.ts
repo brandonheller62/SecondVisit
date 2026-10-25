@@ -59,7 +59,7 @@ export function parsePatients(csv: string): ParseResult {
   if (blocked.length) {
     return {
       ok: false,
-      error: `Rejected: this file has identifying columns (${blocked.join(", ")}). Trial Mirror accepts de-identified data only. Remove those columns and upload again. Nothing was stored.`,
+      error: `Rejected: this file has identifying columns (${blocked.join(", ")}). Second Visit accepts de-identified data only. Remove those columns and upload again. Nothing was stored.`,
       blockedColumns: blocked,
     };
   }

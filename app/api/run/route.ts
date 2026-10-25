@@ -1,4 +1,4 @@
-// POST /api/run: runs the Trial Mirror agent and streams each step as
+// POST /api/run: runs the Second Visit agent and streams each step as
 // newline-delimited JSON (one AgentEvent per line). The patient CSV lives only
 // in this request's memory: it is never written to disk or logged.
 

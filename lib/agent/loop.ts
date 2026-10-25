@@ -22,7 +22,7 @@ export async function runAgent(req: RunRequest, emit: Emit, signal?: AbortSignal
   const messages: Anthropic.MessageParam[] = [
     {
       role: "user",
-      content: `Run Trial Mirror for trial ${req.nctId.trim()}. The patient CSV is uploaded and held on the server (you will see only aggregates).${ctx.protocolText ? " The research team also pasted visit schedule / protocol text; extract_visit_schedule will read it." : ""}`,
+      content: `Run Second Visit for trial ${req.nctId.trim()}. The patient CSV is uploaded and held on the server (you will see only aggregates).${ctx.protocolText ? " The research team also pasted visit schedule / protocol text; extract_visit_schedule will read it." : ""}`,
     },
   ];
   let stepNo = 0;
