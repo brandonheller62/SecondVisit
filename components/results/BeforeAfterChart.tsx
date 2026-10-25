@@ -1,13 +1,10 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, LabelList, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { SUPPORT_LABELS } from "@/lib/assumptions";
+import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { fmtPct } from "@/lib/format";
 import type { SimulationRun } from "@/lib/scoring/simulate";
 import type { Tier } from "@/lib/types";
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
-import { ico } from "@/components/shell/icons";
-import { Card, ScenarioBadge, useThemeColors } from "@/components/shell/ui";
+import { Card, useThemeColors } from "@/components/shell/ui";
 
 
 /** Expected completion with and without the selected supports, overall and by baseline support need. */
@@ -33,30 +30,27 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
   const afterLabel = "With support";
 
   return (
-    <Card
-      title={<>Completion with and without support<ScenarioBadge /></>}
-      subtitle="Expected share who finish the trial under the scenario assumptions. Turn supports on or off to compare."
-    >
-      <div className="mb-4 flex flex-wrap gap-6">
+    <Card title="Who finishes the trial">
+      <dl className="mb-2 flex flex-wrap gap-x-10 gap-y-2">
         <div>
-          <div className="text-sm text-muted">Expected to finish<ScenarioBadge /></div>
-          <div className="flex items-center gap-2 text-3xl font-bold tabular-nums">
-            {r.expectedCompletersBefore}
-            <ArrowRight {...ico} className={`${ico.className} text-muted`} />
-            <span className="sr-only">to</span>
-            <span className="text-primary">{r.expectedCompletersAfter}</span>
-          </div>
-          <div className="text-sm text-muted">
-            of {sim.before.patients.length} patients ({fmtPct(r.completionBefore)} without, {fmtPct(r.completionAfter)} with supports)
-          </div>
+          <dt className="text-sm text-muted">Without support</dt>
+          <dd className="text-4xl font-semibold tracking-tight">{fmtPct(r.completionBefore)}</dd>
         </div>
         <div>
-          <div className="text-sm text-muted">Supports on</div>
-          <div className="text-lg">{r.supports.map((s) => SUPPORT_LABELS[s].label).join(", ") || "None"}</div>
+          <dt className="text-sm text-muted">With support</dt>
+          <dd className="text-4xl font-semibold tracking-tight">{fmtPct(r.completionAfter)}</dd>
         </div>
-      </div>
+      </dl>
+      <p className="mb-5 text-sm text-muted">
+        About {Math.round(r.expectedCompletersBefore)} of {sim.before.patients.length} patients finish without support, {Math.round(r.expectedCompletersAfter)} with. Turn supports on or off below.
+      </p>
       {children}
-      <figure className="mt-4">
+      <figure className="mt-6">
+        {/* Tiny legend outside the plot, so it never collides with a bar label. */}
+        <div aria-hidden className="mb-2 flex gap-4 text-xs text-muted">
+          <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-baseline" /> Without support</span>
+          <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-primary" /> With support</span>
+        </div>
         <div style={{ height: 320 }} aria-hidden>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 28, right: 8, left: 0, bottom: 0 }} barGap={6}>
@@ -68,7 +62,6 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
                 formatter={(v) => `${v}%`}
                 contentStyle={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: 6, color: c.text }}
               />
-              <Legend align="right" verticalAlign="top" iconType="square" iconSize={10} wrapperStyle={{ color: c.muted, fontSize: 12, paddingBottom: 8 }} />
               <Bar dataKey="before" name="Without support" fill={c.baseline} radius={[2, 2, 0, 0]}>
                 <LabelList dataKey="before" position="top" fill={c.muted} fontSize={12} formatter={(v) => `${v}%`} />
               </Bar>

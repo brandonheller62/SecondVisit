@@ -5,7 +5,7 @@ import { fmtPct, TOO_SMALL } from "@/lib/format";
 import { MIN_GROUP_SIZE } from "@/lib/scoring/simulate";
 import type { GroupBy, GroupSummary } from "@/lib/types";
 import { GROUP_BYS } from "@/lib/types";
-import { Card, Chip, ScenarioBadge } from "@/components/shell/ui";
+import { Card, Chip } from "@/components/shell/ui";
 
 const LABEL: Record<GroupBy, string> = {
   preferredLanguage: "Language",
@@ -26,7 +26,7 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
   return (
     <Card
       title="By group"
-      subtitle={`Expected completion without and with the selected supports. Groups under ${MIN_GROUP_SIZE} people are not shown.`}
+      subtitle={`Groups under ${MIN_GROUP_SIZE} people are hidden.`}
       actions={
         <div role="group" aria-label="Group by" className="flex flex-wrap gap-1">
           {GROUP_BYS.map((k) => (
@@ -44,8 +44,8 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
             <tr className="border-b border-border">
               <th scope="col" className="py-2 pr-3 font-medium">{LABEL[by]}</th>
               <th scope="col" className="py-2 pr-3 font-medium">People</th>
-              <th scope="col" className="py-2 pr-3 font-medium">Without supports<ScenarioBadge /></th>
-              <th scope="col" className="py-2 pr-3 font-medium">With supports<ScenarioBadge /></th>
+              <th scope="col" className="py-2 pr-3 font-medium">Without support</th>
+              <th scope="col" className="py-2 pr-3 font-medium">With support</th>
               <th scope="col" className="py-2 font-medium">Change</th>
             </tr>
           </thead>
@@ -59,7 +59,7 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
                   <>
                     <td className="py-2 pr-3 tabular-nums">{r.n}</td>
                     <td className="py-2 pr-3 tabular-nums">{fmtPct(r.completionBefore!)}</td>
-                    <td className="py-2 pr-3 tabular-nums text-primary">{fmtPct(r.completionAfter!)}</td>
+                    <td className="py-2 pr-3 tabular-nums font-semibold">{fmtPct(r.completionAfter!)}</td>
                     <td className="py-2 tabular-nums">{signedPts(r.completionAfter! - r.completionBefore!)}</td>
                   </>
                 )}

@@ -23,7 +23,7 @@ export function TopNav({ tab, onTab, enabled, subtitle }: {
             Trial Mirror
           </span>
           {subtitle && (
-            <span className="hidden min-w-0 truncate text-sm text-muted lg:block" title={subtitle}>
+            <span className="hidden min-w-0 truncate text-sm text-muted md:block" title={subtitle}>
               {subtitle}
             </span>
           )}

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { BARRIER_LABELS, COST_UNKNOWN_CAVEAT, SUPPORT_LABELS } from "@/lib/assumptions";
-import { fmtCents, fmtPct, tierStyle } from "@/lib/format";
+import { BARRIER_LABELS, SUPPORT_LABELS } from "@/lib/assumptions";
+import { fmtCents, fmtPct } from "@/lib/format";
 import type { PatientScore, Tier } from "@/lib/types";
 import { BarrierIcon, TierIcon } from "@/components/shell/icons";
-import { Badge, Button, Card, Chip, ScenarioBadge, SyntheticTag } from "@/components/shell/ui";
+import { Badge, Button, Card, Chip } from "@/components/shell/ui";
 
 const FILTERS: (Tier | "All")[] = ["All", "High", "Medium", "Low"];
 const PAGE = 15;
@@ -49,7 +49,7 @@ function PatientCost({ p, visits }: { p: PatientScore; visits: number }) {
 }
 
 /** Ranked by need for support. The order decides who is offered help first, never who is excluded. */
-export function SupportList({ patients, visitCount, costUnknown }: { patients: PatientScore[]; visitCount: number; costUnknown: boolean }) {
+export function SupportList({ patients, visitCount }: { patients: PatientScore[]; visitCount: number }) {
   const [filter, setFilter] = useState<Tier | "All">("All");
   const [shown, setShown] = useState(PAGE);
   const rows = filter === "All" ? patients : patients.filter((p) => p.tier === filter);
@@ -60,7 +60,7 @@ export function SupportList({ patients, visitCount, costUnknown }: { patients: P
   return (
     <Card
       title="Ranked support list"
-      subtitle="Who to offer support first, and what the trial's visits cost each person. This order is never used to exclude, deprioritize or reject anyone."
+      subtitle="Who to offer help first. Never used to exclude anyone."
       actions={
         <div role="group" aria-label="Filter by support need" className="flex flex-wrap gap-1">
           {FILTERS.map((f) => (
@@ -78,7 +78,6 @@ export function SupportList({ patients, visitCount, costUnknown }: { patients: P
         </div>
       }
     >
-      {costUnknown && <p className="mb-3 text-warn">{COST_UNKNOWN_CAVEAT}</p>}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1040px] text-left">
           <caption className="sr-only">Patients ranked by need for support to stay in the trial</caption>
@@ -86,7 +85,7 @@ export function SupportList({ patients, visitCount, costUnknown }: { patients: P
             <tr className="border-b border-border">
               <th scope="col" className="py-2 pr-3 font-medium">#</th>
               <th scope="col" className="py-2 pr-3 font-medium">Patient</th>
-              <th scope="col" className="py-2 pr-3 font-medium">Support need<ScenarioBadge /></th>
+              <th scope="col" className="py-2 pr-3 font-medium">Support need</th>
               <th scope="col" className="py-2 pr-3 font-medium">Top barriers (visit)</th>
               <th scope="col" className="py-2 pr-8 font-medium">What visits cost them</th>
               <th scope="col" className="py-2 font-medium">Recommended supports</th>
@@ -97,11 +96,10 @@ export function SupportList({ patients, visitCount, costUnknown }: { patients: P
               <tr key={p.patientId} className="border-b border-border/60 align-top">
                 <td className="py-3 pr-3 tabular-nums text-muted">{rank.get(p.patientId)}</td>
                 <td className="py-3 pr-3">
-                  <div className="font-mono font-semibold">{p.patientId}</div>
-                  <SyntheticTag />
+                  <div className="whitespace-nowrap font-mono font-semibold">{p.patientId}</div>
                 </td>
                 <td className="py-3 pr-3">
-                  <Badge tone={tierStyle[p.tier].tone}>
+                  <Badge>
                     <TierIcon tier={p.tier} /> {p.tier}
                   </Badge>
                   <div className="mt-1 text-sm text-muted">
@@ -130,7 +128,7 @@ export function SupportList({ patients, visitCount, costUnknown }: { patients: P
                   <div className="flex flex-wrap gap-1">
                     {p.recommendedSupports.length === 0 && <span className="text-muted">Standard reminders</span>}
                     {p.recommendedSupports.map((s) => (
-                      <Badge key={s} tone="primary">{SUPPORT_LABELS[s].label}</Badge>
+                      <Badge key={s}>{SUPPORT_LABELS[s].label}</Badge>
                     ))}
                   </div>
                 </td>

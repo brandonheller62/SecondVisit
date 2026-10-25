@@ -1,6 +1,5 @@
 // Display helpers shared by every screen.
 
-import type { Tier } from "./types";
 
 export const TOO_SMALL = "Too small to report";
 
@@ -12,9 +11,12 @@ export const fmtCents = (n: number) => n.toLocaleString("en-US", { style: "curre
 export const fmtMoney = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: Math.abs(n) < 10 ? 2 : 0 });
 
-/** Tier badge tone. The icon (components/shell/icons.tsx) and word carry the tier too, so color is never alone. */
-export const tierStyle: Record<Tier, { tone: "bad" | "warn" | "ok" }> = {
-  High: { tone: "bad" },
-  Medium: { tone: "warn" },
-  Low: { tone: "ok" },
-};
+/**
+ * Registry titles arrive in odd casing ("patiEnts", "EmpaGliflozin"). Lowercase
+ * every word except true acronyms and codes (all capitals, like NASH, SGLT2,
+ * NCT05232071), then capitalize the first letter.
+ */
+export function sentenceCase(title: string): string {
+  const out = title.replace(/[A-Za-z][A-Za-z0-9]*/g, (w) => (w.length > 1 && w === w.toUpperCase() ? w : w.toLowerCase()));
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}

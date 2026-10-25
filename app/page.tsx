@@ -8,6 +8,7 @@ import { SafetyNote } from "@/components/shell/SafetyNote";
 import { TopNav, type Tab } from "@/components/shell/TopNav";
 import { StartPanel, type PatientFile } from "@/components/start/StartPanel";
 import { cloneAssumptions, type Assumptions } from "@/lib/assumptions";
+import { sentenceCase } from "@/lib/format";
 import { NCT_PATTERN } from "@/lib/nct";
 import { parsePatients } from "@/lib/scoring/parsePatients";
 import { allSupports, BASELINE } from "@/lib/scoring/score";
@@ -17,8 +18,6 @@ export default function Home() {
   const [tab, setTab] = useState<Tab>("start");
   const [nctId, setNctId] = useState("");
   const [file, setFile] = useState<PatientFile | null>(null);
-  const [protocolText, setProtocolText] = useState("");
-  const [showProtocol, setShowProtocol] = useState(false);
   const [assumptions, setAssumptions] = useState<Assumptions>(() => cloneAssumptions());
   const [scenario, setScenario] = useState<Scenario>(BASELINE);
   const { state: run, start, cancel } = useAgentRun();
@@ -31,24 +30,6 @@ export default function Home() {
   useEffect(() => {
     if (run.simulation) setScenario({ supports: allSupports(run.simulation.supports) });
   }, [run.simulation]);
-  useEffect(() => {
-    if (run.stop?.reason === "needs_schedule") setShowProtocol(true);
-  }, [run.stop]);
-
-  // "Paste the visit schedule" buttons: open Start, then scroll to and focus the paste box once it renders.
-  const [jumpToProtocol, setJumpToProtocol] = useState(false);
-  function pasteSchedule() {
-    setShowProtocol(true);
-    setTab("start");
-    setJumpToProtocol(true);
-  }
-  useEffect(() => {
-    if (!jumpToProtocol || tab !== "start") return;
-    const el = document.getElementById("protocol");
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    el?.focus({ preventScroll: true });
-    setJumpToProtocol(false);
-  }, [jumpToProtocol, tab]);
 
   async function loadSample() {
     const csv = await fetch("/api/sample-patients").then((r) => r.text());
@@ -63,7 +44,7 @@ export default function Home() {
   function runAgent() {
     if (!file?.parse.ok) return;
     setScenario(BASELINE);
-    start({ nctId: nctId.trim().toUpperCase(), csv: file.csv, protocolText: showProtocol && protocolText.trim() ? protocolText : undefined });
+    start({ nctId: nctId.trim().toUpperCase(), csv: file.csv });
     setTab("run");
   }
 
@@ -79,7 +60,7 @@ export default function Home() {
         Skip to content
       </a>
       <div className="sticky top-0 z-30">
-        <TopNav tab={tab} onTab={setTab} enabled={enabled} subtitle={run.trial ? `${run.trial.nctId}: ${run.trial.title}` : undefined} />
+        <TopNav tab={tab} onTab={setTab} enabled={enabled} subtitle={run.trial ? sentenceCase(run.trial.title) : undefined} />
       </div>
       <main id="main" className="mx-auto max-w-7xl px-4 py-8">
         {tab === "start" && (
@@ -90,14 +71,11 @@ export default function Home() {
             file={file}
             onSample={loadSample}
             onUpload={upload}
-            protocolText={protocolText}
-            onProtocolText={setProtocolText}
-            showProtocol={showProtocol}
             onRun={runAgent}
             running={run.status === "running"}
           />
         )}
-        {tab === "run" && <AgentRunTimeline run={run} onCancel={cancel} onOpen={setTab} onPasteSchedule={pasteSchedule} />}
+        {tab === "run" && <AgentRunTimeline run={run} onCancel={cancel} onOpen={setTab} />}
         {tab === "results" && schedule && patients && (
           <ResultsView
             trial={run.trial}
@@ -107,7 +85,6 @@ export default function Home() {
             onAssumptions={setAssumptions}
             scenario={scenario}
             onScenario={setScenario}
-            onPasteSchedule={pasteSchedule}
             exampleSchedule={false}
             replay={false}
           />

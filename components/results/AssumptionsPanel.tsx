@@ -4,7 +4,7 @@ import { BARRIER_LABELS, DEFAULT_ASSUMPTIONS, cloneAssumptions, type Assumptions
 import type { BarrierKey, MaybeUnknown } from "@/lib/types";
 import { BARRIER_KEYS, isKnown } from "@/lib/types";
 import { BarrierIcon } from "@/components/shell/icons";
-import { AssumptionTag, Badge, Button, Card, Toggle } from "@/components/shell/ui";
+import { Badge, Button, Card, Toggle } from "@/components/shell/ui";
 import { NumberField } from "./NumberField";
 
 const LANGUAGE_OPTIONS = ["English", "Spanish", "Haitian Creole", "Portuguese"];
@@ -30,19 +30,19 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
   return (
     <Card
       title="Assumptions"
-      subtitle="Every number here is an assumption: a knob, not a measured fact. None has been validated against real dropout data."
+      subtitle="Every number here is a guess you can change. None has been checked against real dropout data."
       actions={
         <div className="flex items-center gap-3">
-          {changed && <Badge tone="warn">Edited</Badge>}
+          {changed && <Badge>Edited</Badge>}
           <Button disabled={!changed} onClick={() => onAssumptions(cloneAssumptions())}>Reset to defaults</Button>
         </div>
       }
     >
-      <h3 className="text-lg font-semibold">Barrier weights (per visit)<AssumptionTag /></h3>
+      <h3 className="text-lg font-semibold">Barrier weights (per visit)</h3>
       <p className="text-sm text-muted">How hard a visit is = 1 − product of (1 − weight × exposure). It adds up across visits.</p>
-      <div className="mt-3 grid gap-4 md:grid-cols-2">
+      <div className="mt-3 grid gap-x-8 gap-y-5 md:grid-cols-2">
         {BARRIER_KEYS.map((k) => (
-          <div key={k} className="rounded-lg bg-bg p-3">
+          <div key={k}>
             <label htmlFor={`w-${k}`} className="flex items-center justify-between gap-2 font-medium">
               <span>
                 <BarrierIcon barrier={k} className="mr-1.5 text-muted" />
@@ -75,8 +75,8 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
         <div>
           <h3 className="text-lg font-semibold">Support need levels</h3>
           <div className="mt-2 grid gap-3">
-            <NumberField assumption label="High when chance of needing help to stay ≥" step={0.05} max={1} value={a.tiers.high} onChange={(v) => set({ tiers: { ...a.tiers, high: Math.max(v, a.tiers.medium) } })} />
-            <NumberField assumption label="Medium when chance of needing help to stay ≥" step={0.05} max={1} value={a.tiers.medium} onChange={(v) => set({ tiers: { ...a.tiers, medium: Math.min(v, a.tiers.high) } })} />
+            <NumberField label="High when chance of needing help to stay ≥" step={0.05} max={1} value={a.tiers.high} onChange={(v) => set({ tiers: { ...a.tiers, high: Math.max(v, a.tiers.medium) } })} />
+            <NumberField label="Medium when chance of needing help to stay ≥" step={0.05} max={1} value={a.tiers.medium} onChange={(v) => set({ tiers: { ...a.tiers, medium: Math.min(v, a.tiers.high) } })} />
           </div>
         </div>
 
@@ -108,8 +108,8 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
         <div>
           <h3 className="text-lg font-semibold">Costs and unknowns</h3>
           <div className="mt-2 grid gap-3">
-            <NumberField assumption label="Spare budget per visit" prefix="$" step={10} value={a.unitCosts.discretionaryBudgetPerVisit} onChange={(v) => set({ unitCosts: { ...a.unitCosts, discretionaryBudgetPerVisit: Math.max(1, v) } })} />
-            <NumberField assumption label="Unknown visit length" suffix="min" step={15} value={a.unknowns.durationMinutes} onChange={(v) => set({ unknowns: { ...a.unknowns, durationMinutes: v } })} />
+            <NumberField label="Spare budget per visit" prefix="$" step={10} value={a.unitCosts.discretionaryBudgetPerVisit} onChange={(v) => set({ unitCosts: { ...a.unitCosts, discretionaryBudgetPerVisit: Math.max(1, v) } })} />
+            <NumberField label="Unknown visit length" suffix="min" step={15} value={a.unknowns.durationMinutes} onChange={(v) => set({ unknowns: { ...a.unknowns, durationMinutes: v } })} />
           </div>
         </div>
       </div>

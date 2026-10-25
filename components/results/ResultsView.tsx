@@ -2,13 +2,13 @@
 
 import { CaretRight } from "@phosphor-icons/react/dist/ssr";
 import { useMemo } from "react";
-import { COMPENSATION_LABELS, type Assumptions } from "@/lib/assumptions";
+import type { Assumptions } from "@/lib/assumptions";
 import { simulateSupports, summarizeGroups } from "@/lib/scoring/simulate";
-import { buildSummary, unknownVisitFields, visitsDistinguishable } from "@/lib/scoring/summary";
+import { buildSummary } from "@/lib/scoring/summary";
 import type { GroupBy, GroupSummary, Patient, Scenario, TrialInfo, VisitSchedule } from "@/lib/types";
 import { GROUP_BYS, SUPPORT_KEYS } from "@/lib/types";
 import { ico } from "@/components/shell/icons";
-import { Badge, Card } from "@/components/shell/ui";
+import { Card } from "@/components/shell/ui";
 import { AssumptionsPanel } from "./AssumptionsPanel";
 import { BeforeAfterChart } from "./BeforeAfterChart";
 import { CostPanel } from "./CostPanel";
@@ -17,13 +17,12 @@ import { LimitationsBox } from "./LimitationsBox";
 import { SummaryCard } from "./SummaryCard";
 import { SupportList } from "./SupportList";
 import { SupportToggles } from "./SupportToggles";
-import { UnknownsBanner } from "./UnknownsBanner";
 
 /**
  * Everything here is recomputed in the browser with the same pure scoring code
  * the agent used, so edits to supports and assumptions update instantly.
  */
-export function ResultsView({ trial, schedule, patients, assumptions, onAssumptions, scenario, onScenario, onPasteSchedule, exampleSchedule, replay }: {
+export function ResultsView({ trial, schedule, patients, assumptions, onAssumptions, scenario, onScenario, exampleSchedule, replay }: {
   trial: TrialInfo | null;
   schedule: VisitSchedule;
   patients: Patient[];
@@ -31,7 +30,6 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
   onAssumptions: (a: Assumptions) => void;
   scenario: Scenario;
   onScenario: (s: Scenario) => void;
-  onPasteSchedule: () => void;
   /** The schedule came from the team-written example on Start, not the registry. */
   exampleSchedule: boolean;
   replay: boolean;
@@ -48,29 +46,22 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
     [patients, sim],
   );
   const summary = useMemo(() => buildSummary(sim, assumptions), [sim, assumptions]);
-  const unknownFields = unknownVisitFields(sim.before.scoredVisits);
-  const distinguishable = visitsDistinguishable(sim.before);
-  const costUnknown = assumptions.participantCompensation.kind === "unknown";
 
   return (
     <div className="space-y-6">
-      {unknownFields.length > 0 && <UnknownsBanner fields={unknownFields} distinguishable={distinguishable} source={schedule.source} onPasteSchedule={onPasteSchedule} />}
 
       <div>
-        <h1 className="text-3xl font-bold">Results</h1>
-        {trial && <p className="mt-1 max-w-[75ch] text-lg text-muted">{trial.nctId}: {trial.title}</p>}
+        <h1 className="text-3xl font-semibold tracking-tight">Results</h1>
         <p className="mt-1 text-muted">
-          {patients.length} synthetic patients, {sim.before.scoredVisits.length} scored visits. Trial pays participants: {COMPENSATION_LABELS[assumptions.participantCompensation.kind].toLowerCase()}.
+          {patients.length} synthetic patients, {sim.before.scoredVisits.length} visits{trial ? ` (${trial.nctId})` : ""}. Numbers are estimates from adjustable guesses, not predictions.
+          {replay && " Replay of a previous run."}
+          {exampleSchedule && " Uses an example schedule, not the registry's."}
         </p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {replay && <Badge tone="info">Replay of a previous run</Badge>}
-          {exampleSchedule && <Badge tone="warn">Example schedule written by the team, not from the registry</Badge>}
-        </div>
       </div>
 
       <SummaryCard summary={summary} />
 
-      <SupportList patients={sim.before.patients} visitCount={sim.before.scoredVisits.length} costUnknown={costUnknown} />
+      <SupportList patients={sim.before.patients} visitCount={sim.before.scoredVisits.length} />
 
       <BeforeAfterChart sim={sim}>
         <SupportToggles scenario={scenario} onScenario={onScenario} />
@@ -80,13 +71,13 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
 
       <LimitationsBox />
 
-      <details className="group rounded-xl border border-border bg-surface">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-5 py-4 text-xl font-semibold [&::-webkit-details-marker]:hidden">
+      <details className="group border-t border-border pt-4">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-xl font-semibold [&::-webkit-details-marker]:hidden">
           <CaretRight {...ico} className={`${ico.className} transition-transform group-open:rotate-90`} />
           Advanced
-          <span className="text-sm font-normal text-muted">Assumptions, costs, and how unknowns were handled</span>
+          <span className="text-sm font-normal text-muted">Assumptions and costs</span>
         </summary>
-        <div className="space-y-6 border-t border-border p-5">
+        <div className="mt-4 space-y-8">
           {sim.before.unknownNotes.length > 0 && (
             <Card title="How unknowns were handled">
               <ul className="list-disc space-y-1 pl-5">
