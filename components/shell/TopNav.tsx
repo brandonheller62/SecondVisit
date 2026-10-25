@@ -2,11 +2,11 @@
 
 export type Tab = "start" | "run" | "results" | "drafts";
 
-const tabs: { id: Tab; label: string }[] = [
-  { id: "start", label: "1. Start" },
-  { id: "run", label: "2. Agent run" },
-  { id: "results", label: "3. Results" },
-  { id: "drafts", label: "4. Drafts" },
+const tabs: { id: Tab; label: string; short: string }[] = [
+  { id: "start", label: "1. Start", short: "Start" },
+  { id: "run", label: "2. Agent run", short: "Run" },
+  { id: "results", label: "3. Results", short: "Results" },
+  { id: "drafts", label: "4. Drafts", short: "Drafts" },
 ];
 
 export function TopNav({ tab, onTab, enabled, subtitle }: {
@@ -17,14 +17,19 @@ export function TopNav({ tab, onTab, enabled, subtitle }: {
 }) {
   return (
     <nav aria-label="Main" className="border-b border-line bg-surface">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
-        <div className="mr-auto flex min-w-0 items-baseline gap-3">
-          <span className="text-2xl font-bold tracking-tight">
+      {/* One row at every width: the brand never wraps and the trial title truncates, so the sticky header stays short. */}
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-1.5 sm:gap-6 sm:py-2">
+        <div className="flex shrink-0 items-baseline gap-3 lg:min-w-0 lg:flex-1 lg:shrink">
+          <span className="shrink-0 whitespace-nowrap text-lg font-bold tracking-tight sm:text-2xl">
             Trial <span className="text-accent">Mirror</span>
           </span>
-          {subtitle && <span className="hidden truncate text-sm text-muted md:inline">{subtitle}</span>}
+          {subtitle && (
+            <span className="hidden min-w-0 truncate text-sm text-muted lg:block" title={subtitle}>
+              {subtitle}
+            </span>
+          )}
         </div>
-        <ul className="flex flex-wrap gap-1">
+        <ul className="ml-auto flex min-w-0 overflow-x-auto sm:gap-1 lg:shrink-0">
           {tabs.map((t) => {
             const active = tab === t.id;
             return (
@@ -34,11 +39,12 @@ export function TopNav({ tab, onTab, enabled, subtitle }: {
                   disabled={!enabled[t.id]}
                   aria-current={active ? "page" : undefined}
                   onClick={() => onTab(t.id)}
-                  className={`rounded-lg px-3 py-2 font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                  className={`min-h-11 min-w-11 whitespace-nowrap rounded-lg px-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40 sm:px-3 sm:text-base ${
                     active ? "bg-accent text-accent-ink" : "text-ink hover:bg-surface-2"
                   }`}
                 >
-                  {t.label}
+                  <span className="sm:hidden">{t.short}</span>
+                  <span className="hidden sm:inline">{t.label}</span>
                 </button>
               </li>
             );

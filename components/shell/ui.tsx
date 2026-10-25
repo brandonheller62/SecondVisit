@@ -1,4 +1,23 @@
-import type { ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
+
+const TOKENS = ["accent", "baseline", "ink", "muted", "line", "surface-2"] as const;
+type Token = (typeof TOKENS)[number];
+let tokenCache: Record<Token, string> | null = null;
+
+function readTokens(): Record<Token, string> {
+  if (!tokenCache) {
+    const css = getComputedStyle(document.documentElement);
+    tokenCache = Object.fromEntries(TOKENS.map((t) => [t, css.getPropertyValue(`--color-${t}`).trim()])) as Record<Token, string>;
+  }
+  return tokenCache;
+}
+
+const noTokens = Object.fromEntries(TOKENS.map((t) => [t, "currentColor"])) as Record<Token, string>;
+
+/** Theme colors for chart libraries that need literal values instead of classes. */
+export function useThemeColors(): Record<Token, string> {
+  return useSyncExternalStore(() => () => {}, readTokens, () => noTokens);
+}
 
 // Small shared building blocks. Keep these dumb; feature logic lives in the
 // coordinator/chw/agent folders.
@@ -72,6 +91,22 @@ export function Toggle({ checked, onChange, label, hint }: { checked: boolean; o
         {hint && <span className="block text-sm text-muted">{hint}</span>}
       </span>
       <span className={`text-xs font-bold uppercase ${checked ? "text-accent" : "text-muted"}`}>{checked ? "On" : "Off"}</span>
+    </button>
+  );
+}
+
+/** Small pressed/unpressed filter button. 44px tall so it works as a touch target. */
+export function Chip({ pressed, onClick, children }: { pressed: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={`min-h-11 rounded-lg px-3 text-sm font-medium transition ${
+        pressed ? "bg-accent text-accent-ink" : "border border-line bg-surface-2 hover:border-muted"
+      }`}
+    >
+      {children}
     </button>
   );
 }
