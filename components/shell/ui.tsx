@@ -4,7 +4,7 @@ import { ico } from "./icons";
 
 // Radius rule: controls and inputs rounded-lg (8px), cards rounded-xl (12px), badges and switches pill.
 
-const TOKENS = ["accent", "baseline", "ink", "muted", "line", "surface-2"] as const;
+const TOKENS = ["primary", "baseline", "text", "muted", "border", "surface-2"] as const;
 type Token = (typeof TOKENS)[number];
 let tokenCache: Record<Token, string> | null = null;
 
@@ -34,7 +34,7 @@ export function Card({ title, subtitle, children, className = "", actions }: {
   actions?: ReactNode;
 }) {
   return (
-    <section className={`rounded-xl border border-line bg-surface p-5 ${className}`}>
+    <section className={`rounded-xl border border-border bg-surface p-5 ${className}`}>
       {(title || actions) && (
         <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -50,9 +50,9 @@ export function Card({ title, subtitle, children, className = "", actions }: {
 }
 
 const badgeTones = {
-  neutral: "border-line text-muted",
-  accent: "border-accent/60 text-accent",
-  info: "border-info/60 text-info",
+  neutral: "border-border text-muted",
+  primary: "border-primary/60 text-primary",
+  info: "border-primary/40 bg-primary/5 text-primary",
   ok: "border-ok/60 text-ok",
   warn: "border-warn/60 text-warn",
   bad: "border-bad/60 text-bad",
@@ -87,7 +87,7 @@ export function ScenarioBadge() {
 /** Marks a number whose source is not in the repo. */
 export function AssumptionTag() {
   return (
-    <span title="No source in the repo; set it from your own site's figures" className="ml-1.5 inline-flex items-center rounded-full border border-line px-1.5 align-middle text-[0.65rem] font-semibold uppercase leading-4 tracking-wide text-muted">
+    <span title="No source in the repo; set it from your own site's figures" className="ml-1.5 inline-flex items-center rounded-full border border-border px-1.5 align-middle text-[0.65rem] font-semibold uppercase leading-4 tracking-wide text-muted">
       assumption
     </span>
   );
@@ -102,17 +102,17 @@ export function Toggle({ checked, onChange, label, hint }: { checked: boolean; o
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition ${
-        checked ? "border-accent bg-accent/10" : "border-line bg-surface-2 hover:border-muted"
+        checked ? "border-primary bg-primary/10" : "border-border bg-surface-2 hover:border-muted"
       }`}
     >
-      <span aria-hidden className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? "bg-accent" : "bg-line"}`}>
-        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-ink transition-all ${checked ? "left-[22px]" : "left-0.5"}`} />
+      <span aria-hidden className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? "bg-primary" : "bg-border"}`}>
+        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow-sm ring-1 ring-border transition-all ${checked ? "left-[22px]" : "left-0.5"}`} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block font-medium">{label}</span>
         {hint && <span className="block text-sm text-muted">{hint}</span>}
       </span>
-      <span className={`text-xs font-bold uppercase ${checked ? "text-accent" : "text-muted"}`}>{checked ? "On" : "Off"}</span>
+      <span className={`text-xs font-bold uppercase ${checked ? "text-primary" : "text-muted"}`}>{checked ? "On" : "Off"}</span>
     </button>
   );
 }
@@ -125,7 +125,7 @@ export function Chip({ pressed, onClick, children }: { pressed: boolean; onClick
       aria-pressed={pressed}
       onClick={onClick}
       className={`min-h-11 rounded-lg px-3 text-sm font-medium transition active:scale-[0.98] ${
-        pressed ? "bg-accent text-accent-ink" : "border border-line bg-surface-2 hover:border-muted"
+        pressed ? "bg-primary text-on-primary hover:bg-primary-hover" : "border border-border bg-surface-2 hover:border-muted"
       }`}
     >
       {children}
@@ -138,8 +138,8 @@ export function Button({ children, variant = "secondary", className = "", ...pro
 }) {
   const styles =
     variant === "primary"
-      ? "bg-accent text-accent-ink hover:brightness-110"
-      : "border border-line bg-surface-2 text-ink hover:border-muted";
+      ? "bg-primary text-on-primary enabled:hover:bg-primary-hover enabled:active:bg-primary-hover"
+      : "border border-border bg-surface-2 text-text hover:border-muted";
   return (
     <button
       type="button"
