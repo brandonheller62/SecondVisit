@@ -1,5 +1,5 @@
-import { Flask } from "@phosphor-icons/react/dist/ssr";
-import { useSyncExternalStore, type ReactNode } from "react";
+import { Flask, Info } from "@phosphor-icons/react/dist/ssr";
+import { useId, useSyncExternalStore, type ReactNode } from "react";
 import { ico } from "./icons";
 
 // Radius rule: controls and inputs rounded-md (6px), selectable options rounded-lg (8px), badges and switches pill.
@@ -73,6 +73,25 @@ export function SyntheticTag() {
     <Badge tone="info">
       <Flask {...ico} /> Synthetic
     </Badge>
+  );
+}
+
+/** Small info icon that reveals detail on hover, focus or tap, for fine print that would otherwise be a paragraph. */
+export function InfoTip({ label, children }: { label: string; children: ReactNode }) {
+  const id = useId();
+  return (
+    <span className="group relative inline-flex align-middle">
+      <button type="button" aria-label={label} aria-describedby={id} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted hover:text-text">
+        <Info {...ico} />
+      </button>
+      <span
+        role="tooltip"
+        id={id}
+        className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 w-72 -translate-x-1/2 rounded-md border border-border bg-surface p-3 text-sm font-normal text-text opacity-0 shadow-md transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100"
+      >
+        {children}
+      </span>
+    </span>
   );
 }
 
