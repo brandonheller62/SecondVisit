@@ -12,7 +12,7 @@ Miami AI-agent hackathon · Health & Wellbeing track.
 
 ## The idea
 
-People who qualify for a trial still drop out when visits clash with night shifts, need two buses each way, cost a day's pay, have no childcare, or come with forms in a language they don't read. A research team uploads a CSV of **synthetic, de-identified** patients who are **already medically eligible**. The agent fetches the trial from ClinicalTrials.gov, extracts the visit schedule, scores friction per patient per visit, simulates supports (evening visits, ride vouchers, childcare stipend, interpreter + translated materials, wage & expense reimbursement), summarizes by group, and drafts documents that a human must approve before anything is exported.
+People who qualify for a trial still drop out when visits clash with night shifts, need two buses each way, cost a day's pay, have no childcare, or come with forms in a language they don't read. A research team uploads a CSV of **synthetic, de-identified** patients who are **already medically eligible**. The agent fetches the trial from ClinicalTrials.gov, extracts the visit schedule, scores friction per patient per visit, simulates supports (evening visits, ride vouchers, childcare stipend, interpreter + translated materials, wage & expense reimbursement), and summarizes by group.
 
 **The score decides who gets help first. It is never used to exclude, deprioritize or reject anyone.** It never decides medical eligibility and gives no medical advice.
 
@@ -35,15 +35,15 @@ npm run build                # run before pushing; must pass
 | Env var | Required | What it is |
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | yes | Anthropic API key. Server-side only. |
-| `ANTHROPIC_MODEL` | yes | Claude model id for the agent loop, schedule extraction and drafting, e.g. `claude-opus-5-5` or `claude-sonnet-5-5`. Not hardcoded anywhere. |
+| `ANTHROPIC_MODEL` | yes | Claude model id for the agent loop and schedule extraction, e.g. `claude-opus-5-5` or `claude-sonnet-5-5`. Not hardcoded anywhere. |
 
 Without these the app still loads; **Run agent** reports which variable is missing.
 
-Demo path: **Start** → pick the diabetes/fatty-liver demo trial → **Use sample patients** → **Run agent** → watch the steps stream in → **Results** (toggle supports, edit assumptions) → **Drafts** → tick "I reviewed this", enter a name, **Approve** → export.
+Demo path: **Start** → pick the diabetes/fatty-liver demo trial → **Use sample patients** → **Run agent** → watch the steps stream in → **Results** (toggle supports, edit assumptions).
 
 ## How the agent works
 
-`POST /api/run` (`app/api/run/route.ts`) runs a real tool-use loop (`lib/agent/loop.ts`): it sends the messages and tool definitions to Claude, runs whatever tools Claude asks for in code, sends the results back, and repeats, capped at 12 iterations. Each step streams to the UI as newline-delimited JSON (step id, tool, status, one-line summary, tool input/output). Tool errors go back to Claude as `is_error` results; the prompt tells it to retry once or continue with the part flagged unknown, never to invent data. After `draft_documents` the run stops at the approval gate.
+`POST /api/run` (`app/api/run/route.ts`) runs a real tool-use loop (`lib/agent/loop.ts`): it sends the messages and tool definitions to Claude, runs whatever tools Claude asks for in code, sends the results back, and repeats, capped at 12 iterations. Each step streams to the UI as newline-delimited JSON (step id, tool, status, one-line summary, tool input/output). Tool errors go back to Claude as `is_error` results; the prompt tells it to retry once or continue with the part flagged unknown, never to invent data. The run ends when Claude gives its short closing summary.
 
 | Tool | How it runs |
 | --- | --- |
@@ -53,7 +53,6 @@ Demo path: **Start** → pick the diabetes/fatty-liver demo trial → **Use samp
 | `score_patients` | Code (`lib/scoring/score.ts`). |
 | `simulate_supports` | Code (`lib/scoring/simulate.ts`). |
 | `summarize_groups` | Code. Groups under 10 people → "Too small to report". |
-| `draft_documents` | Claude, structured output, given aggregates and patient IDs only. |
 
 The patient CSV is held in memory for the request and never written to disk or logged. Claude never sees patient rows.
 
@@ -67,12 +66,11 @@ For patient *p* and visit *v*, each barrier term *k* gets an exposure *x* betwee
 - Risk compounds over visits, so trials with many visits push more people into High. Compare patients within a trial, not across trials.
 - Registry records rarely give visit times, durations or fasting; those show as "unknown". Unknown time of day is not scored as a morning clash, so need may be understated; unknown duration uses an assumed length; unknown in-person status is scored as in person.
 - The data has no paid-leave column; the default assumes hourly workers lose pay for daytime visits.
-- Spanish and Haitian Creole drafts are machine-drafted and need native-speaker/CHW review.
 - Synthetic demo data only. No medical questions are answered: talk to a clinician, or call 911 in an emergency.
 
 ## Responsible AI
 
-Synthetic demo data only · uploads must be de-identified, and identifying columns are rejected · rows are never stored or logged · the LLM sees aggregates and patient IDs only · no eligibility decisions · no medical answers · human approval before any export (name and timestamp shown; edits reset approval) · groups under 10 suppressed · native-speaker review flag on Spanish and Creole text · limitations box in the UI.
+Synthetic demo data only · uploads must be de-identified, and identifying columns are rejected · rows are never stored or logged · the LLM sees aggregates and patient IDs only · no eligibility decisions · no medical answers · groups under 10 suppressed · limitations box in the UI.
 
 ## Who owns what
 
