@@ -1,0 +1,121 @@
+patient_id,age,neighborhood,preferred_language,occupation,work_schedule,transport,commute_minutes_one_way,insurance,children_under_6,childcare_available,can_take_unpaid_time_off,missed_appointments_last_12mo,diagnosis_group,a1c
+SYN-001,47,Little Haiti,Haitian Creole,home health aide,night shift,rideshare,40,employer,1,yes,no,4,T2D+MASLD,8.2
+SYN-002,35,North Miami,Haitian Creole,retail,night shift,own car,30,marketplace,2,no,yes,1,T2D,9.4
+SYN-003,66,North Miami,Haitian Creole,retired,none,own car,15,Medicare,0,n/a,n/a,1,MASLD,
+SYN-004,76,Little Havana,Spanish,retired,none,rideshare,60,Medicare,0,n/a,n/a,0,T2D+MASLD,7.4
+SYN-005,72,Homestead,Spanish,retired,none,bus/Metrorail only,42,Medicare,0,n/a,n/a,0,T2D,8.7
+SYN-006,47,Little Haiti,Haitian Creole,construction,day shift,family ride,104,Medicaid,0,n/a,yes,1,T2D,6.9
+SYN-007,39,Little Havana,Spanish,rideshare driver,day shift,family ride,90,Medicaid,0,n/a,yes,0,T2D,8.8
+SYN-008,78,Kendall,English,retired,none,bus/Metrorail only,109,Medicare,0,n/a,n/a,0,MASLD,
+SYN-009,37,Little Haiti,Haitian Creole,office,irregular,bus/Metrorail only,47,uninsured,2,yes,no,3,MASLD,
+SYN-010,54,North Miami,Haitian Creole,home health aide,night shift,own car,22,Medicaid,0,n/a,no,4,T2D,9.7
+SYN-011,75,Little Haiti,Haitian Creole,retired,none,own car,37,Medicare,0,n/a,n/a,0,T2D,7.5
+SYN-012,61,Hialeah,Spanish,self-employed,night shift,bus/Metrorail only,35,employer,0,n/a,no,0,T2D,7.4
+SYN-013,42,Hialeah,Spanish,hotel/hospitality,irregular,bus/Metrorail only,56,employer,2,yes,yes,1,T2D,9.4
+SYN-014,37,Hialeah,Spanish,hotel/hospitality,day shift,bus/Metrorail only,91,marketplace,1,no,no,2,T2D+MASLD,10.0
+SYN-015,64,Hialeah,Spanish,hotel/hospitality,day shift,family ride,41,marketplace,0,n/a,no,0,T2D,10.3
+SYN-016,72,Kendall,English,retired,none,own car,37,Medicare,0,n/a,n/a,0,T2D,7.7
+SYN-017,66,North Miami,Haitian Creole,retired,none,own car,15,Medicare,0,n/a,n/a,3,T2D+MASLD,9.2
+SYN-018,38,Kendall,English,rideshare driver,day shift,bus/Metrorail only,45,employer,1,yes,no,1,T2D+MASLD,9.9
+SYN-019,72,Little Haiti,Haitian Creole,retired,none,own car,40,Medicare,0,n/a,n/a,1,T2D,9.7
+SYN-020,40,Hialeah,Spanish,office,irregular,own car,38,employer,0,n/a,yes,1,T2D,9.5
+SYN-021,53,Doral,Spanish,retail,irregular,own car,29,employer,0,n/a,yes,1,MASLD,
+SYN-022,36,North Miami,Haitian Creole,airport/cruise,irregular,own car,29,marketplace,0,n/a,yes,1,T2D+MASLD,8.2
+SYN-023,40,Hialeah,Spanish,rideshare driver,day shift,own car,35,marketplace,0,n/a,no,3,T2D+MASLD,7.2
+SYN-024,74,Homestead,Spanish,retired,none,own car,43,Medicare,0,n/a,n/a,1,T2D,7.9
+SYN-025,76,Homestead,Spanish,retired,none,own car,25,Medicare,0,n/a,n/a,4,T2D+MASLD,9.3
+SYN-026,44,Little Haiti,Haitian Creole,construction,irregular,own car,16,marketplace,1,no,yes,0,T2D,10.3
+SYN-027,73,Hialeah,Spanish,retired,none,bus/Metrorail only,55,Medicare,0,n/a,n/a,2,MASLD,
+SYN-028,58,Hialeah,Spanish,home health aide,irregular,own car,24,employer,0,n/a,yes,1,T2D,9.0
+SYN-029,70,Hialeah,Spanish,retired,none,own car,26,Medicare,0,n/a,n/a,1,MASLD,
+SYN-030,55,Hialeah,Spanish,home health aide,night shift,own car,28,employer,2,no,yes,2,MASLD,
+SYN-031,64,Hialeah,Spanish,self-employed,day shift,own car,45,employer,0,n/a,no,0,MASLD,
+SYN-032,76,North Miami,Haitian Creole,retired,none,own car,21,Medicare,0,n/a,n/a,1,T2D,6.9
+SYN-033,46,Little Havana,Spanish,self-employed,day shift,bus/Metrorail only,98,uninsured,1,no,yes,0,T2D+MASLD,9.1
+SYN-034,36,Hialeah,Spanish,hotel/hospitality,night shift,own car,27,employer,0,n/a,no,0,T2D,7.9
+SYN-035,34,Little Haiti,Haitian Creole,office,night shift,own car,39,marketplace,0,n/a,yes,4,T2D,7.9
+SYN-036,51,Hialeah,Spanish,self-employed,day shift,bus/Metrorail only,48,marketplace,2,yes,yes,0,T2D+MASLD,9.5
+SYN-037,70,Hialeah,Spanish,retired,none,own car,44,Medicare,0,n/a,n/a,1,T2D+MASLD,8.6
+SYN-038,64,Homestead,Spanish,airport/cruise,night shift,bus/Metrorail only,56,marketplace,0,n/a,yes,0,T2D,7.2
+SYN-039,55,Little Haiti,Haitian Creole,office,night shift,own car,16,employer,1,no,no,1,T2D,8.6
+SYN-040,41,Kendall,English,airport/cruise,night shift,own car,28,Medicaid,0,n/a,no,0,T2D+MASLD,10.2
+SYN-041,34,Kendall,Portuguese,construction,night shift,bus/Metrorail only,92,Medicaid,0,n/a,yes,4,T2D+MASLD,8.4
+SYN-042,42,Kendall,English,hotel/hospitality,irregular,own car,33,employer,1,yes,yes,1,MASLD,
+SYN-043,39,Kendall,English,rideshare driver,irregular,own car,31,marketplace,2,yes,yes,0,T2D,7.9
+SYN-044,66,Hialeah,Spanish,retired,none,bus/Metrorail only,43,Medicare,0,n/a,n/a,2,T2D,8.5
+SYN-045,58,Little Haiti,Haitian Creole,office,day shift,own car,40,employer,0,n/a,yes,1,T2D,6.8
+SYN-046,46,Hialeah,Spanish,self-employed,day shift,own car,33,Medicaid,2,no,yes,1,T2D+MASLD,7.8
+SYN-047,60,Kendall,English,retail,irregular,own car,37,uninsured,1,yes,no,2,MASLD,
+SYN-048,51,Kendall,English,airport/cruise,night shift,family ride,79,marketplace,0,n/a,no,1,T2D+MASLD,8.2
+SYN-049,55,Liberty City,English,self-employed,night shift,bus/Metrorail only,52,marketplace,0,n/a,no,2,MASLD,
+SYN-050,64,Little Haiti,Haitian Creole,hotel/hospitality,irregular,own car,22,marketplace,0,n/a,yes,1,T2D,9.6
+SYN-051,49,Kendall,English,rideshare driver,day shift,own car,32,employer,0,n/a,no,2,T2D,8.1
+SYN-052,54,Miami Beach,English,office,day shift,rideshare,69,uninsured,0,n/a,no,1,T2D,8.3
+SYN-053,43,Homestead,Spanish,office,night shift,own car,17,employer,1,no,yes,2,MASLD,
+SYN-054,72,Hialeah,Spanish,retired,none,own car,33,Medicare,0,n/a,n/a,0,MASLD,
+SYN-055,43,Little Havana,Spanish,construction,night shift,own car,28,marketplace,2,no,yes,0,T2D,9.8
+SYN-056,58,Hialeah,Spanish,construction,night shift,bus/Metrorail only,93,employer,0,n/a,no,2,T2D,8.0
+SYN-057,75,North Miami,Haitian Creole,retired,none,rideshare,93,Medicare,0,n/a,n/a,3,T2D,10.2
+SYN-058,55,Miami Beach,English,office,irregular,own car,27,uninsured,2,yes,yes,3,MASLD,
+SYN-059,36,Little Haiti,Haitian Creole,construction,irregular,own car,43,Medicaid,0,n/a,yes,3,T2D,10.0
+SYN-060,43,Doral,Spanish,hotel/hospitality,day shift,bus/Metrorail only,93,employer,0,n/a,no,2,MASLD,
+SYN-061,60,Little Haiti,Haitian Creole,airport/cruise,irregular,bus/Metrorail only,81,employer,2,no,yes,0,T2D+MASLD,9.9
+SYN-062,72,Little Haiti,Haitian Creole,retired,none,rideshare,85,Medicare,0,n/a,n/a,2,MASLD,
+SYN-063,75,Homestead,Spanish,retired,none,bus/Metrorail only,51,Medicare,0,n/a,n/a,1,T2D,9.6
+SYN-064,75,Hialeah,Spanish,retired,none,bus/Metrorail only,39,Medicare,0,n/a,n/a,1,T2D+MASLD,9.5
+SYN-065,43,Hialeah,Spanish,home health aide,irregular,bus/Metrorail only,45,uninsured,0,n/a,no,1,T2D,9.4
+SYN-066,35,Miami Beach,English,rideshare driver,night shift,own car,38,employer,1,yes,yes,0,T2D,8.5
+SYN-067,69,Homestead,Spanish,retired,none,bus/Metrorail only,104,Medicare,0,n/a,n/a,4,MASLD,
+SYN-068,36,Hialeah,Spanish,rideshare driver,night shift,family ride,84,employer,0,n/a,yes,2,T2D,9.1
+SYN-069,64,Kendall,English,retail,night shift,bus/Metrorail only,39,employer,0,n/a,yes,1,MASLD,
+SYN-070,67,Miami Beach,English,retired,none,own car,32,Medicare,0,n/a,n/a,2,MASLD,
+SYN-071,47,Little Haiti,Haitian Creole,home health aide,irregular,own car,33,employer,0,n/a,no,1,T2D,8.0
+SYN-072,63,Doral,Spanish,construction,night shift,bus/Metrorail only,57,employer,0,n/a,no,0,T2D,8.5
+SYN-073,71,Liberty City,English,retired,none,family ride,86,Medicare,0,n/a,n/a,2,T2D+MASLD,8.4
+SYN-074,77,Kendall,English,retired,none,own car,41,Medicare,0,n/a,n/a,3,MASLD,
+SYN-075,67,Homestead,Spanish,retired,none,bus/Metrorail only,101,Medicare,0,n/a,n/a,2,T2D+MASLD,9.0
+SYN-076,70,Hialeah,Spanish,retired,none,rideshare,102,Medicare,0,n/a,n/a,4,MASLD,
+SYN-077,51,Hialeah,Spanish,office,day shift,rideshare,93,Medicaid,2,yes,no,3,T2D,7.3
+SYN-078,70,Little Havana,Spanish,retired,none,bus/Metrorail only,81,Medicare,0,n/a,n/a,4,T2D,7.0
+SYN-079,43,North Miami,Haitian Creole,home health aide,irregular,own car,44,employer,0,n/a,no,2,T2D,8.2
+SYN-080,73,Liberty City,English,retired,none,bus/Metrorail only,61,Medicare,0,n/a,n/a,0,T2D,6.8
+SYN-081,70,North Miami,Haitian Creole,retired,none,bus/Metrorail only,108,Medicare,0,n/a,n/a,0,T2D,6.9
+SYN-082,56,Little Havana,Spanish,construction,irregular,rideshare,69,Medicaid,1,no,no,4,MASLD,
+SYN-083,43,Hialeah,Spanish,construction,day shift,bus/Metrorail only,90,marketplace,0,n/a,yes,0,T2D,7.8
+SYN-084,35,Doral,Portuguese,self-employed,night shift,own car,44,uninsured,0,n/a,no,0,T2D+MASLD,8.1
+SYN-085,57,Little Havana,Spanish,retail,irregular,bus/Metrorail only,41,uninsured,0,n/a,yes,4,T2D+MASLD,10.4
+SYN-086,61,North Miami,Haitian Creole,office,day shift,own car,26,marketplace,0,n/a,yes,1,MASLD,
+SYN-087,77,Little Haiti,Haitian Creole,retired,none,bus/Metrorail only,79,Medicare,0,n/a,n/a,0,T2D+MASLD,9.5
+SYN-088,60,Kendall,English,home health aide,irregular,family ride,103,employer,1,no,yes,0,T2D+MASLD,8.7
+SYN-089,40,North Miami,Haitian Creole,office,night shift,own car,16,marketplace,1,yes,yes,0,MASLD,
+SYN-090,60,Hialeah,Spanish,self-employed,irregular,rideshare,55,marketplace,1,yes,no,4,T2D,7.7
+SYN-091,56,Miami Beach,Portuguese,rideshare driver,night shift,family ride,60,employer,1,no,no,2,MASLD,
+SYN-092,76,Hialeah,Spanish,retired,none,bus/Metrorail only,108,Medicare,0,n/a,n/a,2,T2D,8.3
+SYN-093,45,Hialeah,Spanish,airport/cruise,night shift,own car,24,employer,1,no,no,0,T2D,8.3
+SYN-094,47,North Miami,Haitian Creole,hotel/hospitality,night shift,own car,43,employer,1,yes,no,1,T2D,9.1
+SYN-095,51,Hialeah,Spanish,hotel/hospitality,irregular,own car,45,employer,2,yes,no,0,T2D,10.4
+SYN-096,67,Hialeah,Spanish,retired,none,own car,20,Medicare,0,n/a,n/a,1,T2D,7.9
+SYN-097,67,Kendall,English,retired,none,own car,44,Medicare,0,n/a,n/a,2,T2D,9.3
+SYN-098,34,Little Haiti,Haitian Creole,home health aide,day shift,bus/Metrorail only,40,uninsured,0,n/a,yes,4,T2D,7.9
+SYN-099,51,Little Havana,Spanish,self-employed,irregular,own car,21,uninsured,0,n/a,no,1,T2D,7.1
+SYN-100,77,Hialeah,Spanish,retired,none,own car,34,Medicare,0,n/a,n/a,0,MASLD,
+SYN-101,52,Hialeah,Spanish,airport/cruise,night shift,rideshare,53,marketplace,0,n/a,no,3,MASLD,
+SYN-102,46,Hialeah,Spanish,self-employed,day shift,own car,31,marketplace,1,no,yes,0,T2D,8.7
+SYN-103,62,Hialeah,Spanish,rideshare driver,night shift,own car,31,employer,0,n/a,no,4,T2D,7.0
+SYN-104,73,North Miami,Haitian Creole,retired,none,bus/Metrorail only,37,Medicare,0,n/a,n/a,1,T2D,8.2
+SYN-105,68,Little Havana,Spanish,retired,none,bus/Metrorail only,55,Medicare,0,n/a,n/a,3,T2D,9.1
+SYN-106,57,Kendall,English,home health aide,irregular,family ride,89,employer,0,n/a,no,2,T2D,7.2
+SYN-107,64,Liberty City,English,airport/cruise,day shift,bus/Metrorail only,84,uninsured,0,n/a,no,2,T2D+MASLD,8.4
+SYN-108,68,Hialeah,Spanish,retired,none,own car,17,Medicare,0,n/a,n/a,4,T2D,7.4
+SYN-109,56,Little Haiti,Haitian Creole,rideshare driver,irregular,own car,41,employer,2,no,yes,0,T2D,7.1
+SYN-110,65,Kendall,English,retired,none,bus/Metrorail only,89,Medicare,0,n/a,n/a,0,T2D+MASLD,9.9
+SYN-111,76,Little Haiti,Haitian Creole,retired,none,bus/Metrorail only,69,Medicare,0,n/a,n/a,0,T2D,7.6
+SYN-112,38,Hialeah,Spanish,retail,irregular,bus/Metrorail only,92,employer,0,n/a,no,0,MASLD,
+SYN-113,75,Hialeah,Spanish,retired,none,own car,37,Medicare,0,n/a,n/a,1,T2D+MASLD,6.8
+SYN-114,70,Miami Beach,English,retired,none,rideshare,55,Medicare,0,n/a,n/a,0,T2D+MASLD,9.9
+SYN-115,50,Hialeah,Spanish,home health aide,night shift,own car,32,employer,1,no,no,0,MASLD,
+SYN-116,56,North Miami,Haitian Creole,construction,day shift,own car,27,Medicaid,0,n/a,yes,3,T2D+MASLD,7.6
+SYN-117,44,Homestead,Spanish,construction,day shift,bus/Metrorail only,100,employer,1,yes,no,1,T2D+MASLD,7.5
+SYN-118,42,Hialeah,Spanish,self-employed,night shift,family ride,47,uninsured,0,n/a,no,0,T2D+MASLD,9.8
+SYN-119,66,Homestead,Spanish,retired,none,own car,37,Medicare,0,n/a,n/a,2,T2D+MASLD,9.5
+SYN-120,57,Liberty City,English,self-employed,day shift,bus/Metrorail only,85,employer,2,yes,no,4,T2D,6.9
