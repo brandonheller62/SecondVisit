@@ -1,11 +1,11 @@
-// Claude calls that are not the main loop: schedule extraction and drafting.
+// Claude calls that are not the main loop: schedule extraction.
 // Server-only. Model id and key come from env (ANTHROPIC_MODEL, ANTHROPIC_API_KEY).
 
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
-import type { Draft, Visit, VisitSchedule } from "../types";
-import { DRAFT_SYSTEM, EXTRACT_SYSTEM } from "./prompts";
+import type { Visit, VisitSchedule } from "../types";
+import { EXTRACT_SYSTEM } from "./prompts";
 
 export function getModel(): string {
   const model = process.env.ANTHROPIC_MODEL?.trim();
@@ -69,43 +69,4 @@ export async function extractVisitSchedule(text: string, source: VisitSchedule["
     source,
     evidence: out.visits.map((v) => v.evidence),
   };
-}
-
-const Drafts = z.object({
-  barrierReport: z.string(),
-  questionsForResearchTeam: z.string(),
-  accommodationRequest: z.string(),
-  participantSummaryEnglish: z.string(),
-  participantSummarySpanish: z.string(),
-  participantSummaryHaitianCreole: z.string(),
-});
-
-/** Claude only ever receives aggregates and patient IDs here, never patient rows. */
-export async function draftDocuments(findings: unknown): Promise<Draft[]> {
-  const res = await getClient().messages.parse({
-    model: getModel(),
-    max_tokens: 16000,
-    system: DRAFT_SYSTEM,
-    messages: [{ role: "user", content: `<findings>\n${JSON.stringify(findings, null, 2)}\n</findings>` }],
-    output_config: { format: zodOutputFormat(Drafts) },
-  });
-  if (res.stop_reason === "refusal") throw new Error("The model declined to draft documents.");
-  const d = res.parsed_output;
-  if (!d) throw new Error("Drafting returned no parseable result.");
-  const mk = (id: string, kind: Draft["kind"], language: Draft["language"], title: string, text: string, needsNativeReview = false): Draft => ({
-    id,
-    kind,
-    language,
-    title,
-    text,
-    needsNativeReview,
-  });
-  return [
-    mk("barrier-report", "barrierReport", "en", "Barrier report for the research team", d.barrierReport),
-    mk("questions", "questions", "en", "Questions to ask the research team", d.questionsForResearchTeam),
-    mk("accommodation", "accommodationRequest", "en", "Accommodation & reimbursement request", d.accommodationRequest),
-    mk("summary-en", "participantSummary", "en", "Participant summary (English)", d.participantSummaryEnglish),
-    mk("summary-es", "participantSummary", "es", "Resumen para participantes (Español)", d.participantSummarySpanish, true),
-    mk("summary-ht", "participantSummary", "ht", "Rezime pou patisipan yo (Kreyòl ayisyen)", d.participantSummaryHaitianCreole, true),
-  ];
 }

@@ -1,6 +1,6 @@
 // The agent loop: send messages + tools to Claude, run the tools it asks for
-// in code, send results back, repeat until Claude finishes, the approval gate
-// is reached, or MAX_ITERATIONS is hit. Every step is emitted to the UI.
+// in code, send results back, repeat until Claude finishes or
+// MAX_ITERATIONS is hit. Every step is emitted to the UI.
 
 import Anthropic from "@anthropic-ai/sdk";
 import type { AgentEvent, RunRequest, RunStopReason } from "../types";
@@ -55,7 +55,7 @@ export async function runAgent(req: RunRequest, emit: Emit, signal?: AbortSignal
       if (ctx.schedule && !ctx.schedule.scheduleFound) {
         return done(emit, "needs_schedule", "The registry record has no usable visit schedule. Paste the visit schedule or protocol text and run again.");
       }
-      return done(emit, "finished", "The agent finished without drafting documents.");
+      return done(emit, "finished", "Analysis finished. Open Results to see who to offer support first.");
     }
 
     messages.push({ role: "assistant", content: response.content });
@@ -75,7 +75,6 @@ export async function runAgent(req: RunRequest, emit: Emit, signal?: AbortSignal
           if (tool === "fetch_trial" && ctx.trial) emit({ type: "trial", trial: ctx.trial });
           if (tool === "extract_visit_schedule" && ctx.schedule) emit({ type: "schedule", schedule: ctx.schedule });
           if (tool === "simulate_supports" && ctx.sim) emit({ type: "simulation", supports: ctx.sim.result.supports });
-          if (tool === "draft_documents" && ctx.drafts) emit({ type: "drafts", drafts: ctx.drafts });
           return { type: "tool_result", tool_use_id: use.id, content: JSON.stringify(out.forModel) };
         } catch (e) {
           const message = e instanceof Anthropic.APIError ? `Claude API error ${e.status ?? ""}: ${e.message}` : e instanceof Error ? e.message : String(e);
@@ -84,9 +83,6 @@ export async function runAgent(req: RunRequest, emit: Emit, signal?: AbortSignal
         }
       }),
     );
-
-    // Human control: once drafts exist, stop at the approval gate.
-    if (ctx.drafts) return done(emit, "approval_gate", "Drafts are ready. A reviewer must approve them before anything can be exported.");
 
     messages.push({ role: "user", content: results });
   }

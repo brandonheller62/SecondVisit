@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import type { AgentEvent, Draft, RunRequest, RunStopReason, SupportKey, ToolName, TrialInfo, VisitSchedule } from "@/lib/types";
+import type { AgentEvent, RunRequest, RunStopReason, SupportKey, ToolName, TrialInfo, VisitSchedule } from "@/lib/types";
 
 export interface RunStep {
   id: string;
@@ -21,11 +21,10 @@ export interface RunState {
   trial: TrialInfo | null;
   schedule: VisitSchedule | null;
   simulation: { supports: SupportKey[] } | null;
-  drafts: Draft[] | null;
   stop: { reason: RunStopReason; message: string } | null;
 }
 
-const EMPTY: RunState = { status: "idle", items: [], trial: null, schedule: null, simulation: null, drafts: null, stop: null };
+const EMPTY: RunState = { status: "idle", items: [], trial: null, schedule: null, simulation: null, stop: null };
 
 function reduce(s: RunState, e: AgentEvent): RunState {
   switch (e.type) {
@@ -45,8 +44,6 @@ function reduce(s: RunState, e: AgentEvent): RunState {
       return { ...s, schedule: e.schedule };
     case "simulation":
       return { ...s, simulation: { supports: e.supports } };
-    case "drafts":
-      return { ...s, drafts: e.drafts };
     case "done":
       return { ...s, status: "done", stop: { reason: e.reason, message: e.message } };
   }

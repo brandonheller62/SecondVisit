@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check, ChatText, CircleNotch, Pause, Warning, WarningCircle } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, Check, ChatText, CircleNotch, Warning, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 
 import type { RunStopReason, ToolName } from "@/lib/types";
 import { ico, type PhosphorIcon } from "@/components/shell/icons";
@@ -15,7 +15,6 @@ const TOOL_LABEL: Record<ToolName, string> = {
   score_patients: "Score friction per patient and visit",
   simulate_supports: "Simulate supports",
   summarize_groups: "Summarize by group",
-  draft_documents: "Draft documents",
 };
 
 const statusUi: Record<RunStep["status"], { Icon: PhosphorIcon; spin?: boolean; word: string; ring: string; tone: "info" | "ok" | "bad" }> = {
@@ -25,7 +24,6 @@ const statusUi: Record<RunStep["status"], { Icon: PhosphorIcon; spin?: boolean; 
 };
 
 const stopUi: Record<RunStopReason, { tone: "ok" | "warn" | "bad"; title: string }> = {
-  approval_gate: { tone: "warn", title: "Waiting for human approval" },
   needs_schedule: { tone: "warn", title: "Visit schedule needed" },
   finished: { tone: "ok", title: "Finished" },
   iteration_cap: { tone: "bad", title: "Stopped at the 12-step limit" },
@@ -108,7 +106,6 @@ export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
         <Card className={`tm-enter ${stopBorder[stopUi[run.stop.reason].tone]}`}>
           <div role="status">
             <h2 className="flex items-center gap-2 text-xl font-semibold">
-              {run.stop.reason === "approval_gate" && <Pause {...ico} />}
               {stopUi[run.stop.reason].title}
             </h2>
             <p className="mt-1">{run.stop.message}</p>

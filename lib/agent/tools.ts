@@ -1,5 +1,5 @@
 // Tool definitions and executors for the agent loop. Deterministic tools are
-// plain TypeScript; only extract_visit_schedule and draft_documents call Claude.
+// plain TypeScript; only extract_visit_schedule calls Claude.
 // Patient rows stay in RunContext on the server and never go into a tool result.
 
 import type Anthropic from "@anthropic-ai/sdk";
@@ -8,9 +8,9 @@ import { DEFAULT_ASSUMPTIONS, SUPPORT_LABELS, type Assumptions } from "../assump
 import { parsePatients } from "../scoring/parsePatients";
 import { scorePatients } from "../scoring/score";
 import { simulateSupports, summarizeGroups, type SimulationRun } from "../scoring/simulate";
-import type { Draft, GroupBy, GroupSummary, Patient, ScoreResult, SupportKey, ToolName, TrialInfo, VisitSchedule } from "../types";
+import type { GroupBy, GroupSummary, Patient, ScoreResult, SupportKey, ToolName, TrialInfo, VisitSchedule } from "../types";
 import { GROUP_BYS, SUPPORT_KEYS } from "../types";
-import { draftDocuments, extractVisitSchedule } from "./llm";
+import { extractVisitSchedule } from "./llm";
 import { fetchTrial, trialText } from "./trial";
 
 export interface RunContext {
@@ -23,7 +23,6 @@ export interface RunContext {
   score?: ScoreResult;
   sim?: SimulationRun;
   groups: Partial<Record<GroupBy, GroupSummary>>;
-  drafts?: Draft[];
 }
 
 export const newContext = (csv: string, protocolText?: string): RunContext => ({
@@ -83,16 +82,6 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
       additionalProperties: false,
     },
   },
-  {
-    name: "draft_documents",
-    description: "Draft the barrier report, questions for the research team, accommodation request, and a plain-language participant summary in English, Spanish and Haitian Creole. Uses aggregates only. After this the run stops for human approval.",
-    input_schema: {
-      type: "object",
-      properties: { findings_summary: { type: "string", description: "Short factual summary of the findings, from tool results only" } },
-      required: ["findings_summary"],
-      additionalProperties: false,
-    },
-  },
 ];
 
 const inputs = {
@@ -102,7 +91,6 @@ const inputs = {
   score_patients: z.object({}).passthrough(),
   simulate_supports: z.object({ supports: z.array(z.enum(SUPPORT_KEYS)) }),
   summarize_groups: z.object({ group_by: z.enum(GROUP_BYS) }),
-  draft_documents: z.object({ findings_summary: z.string() }),
 } satisfies Record<ToolName, z.ZodTypeAny>;
 
 export const isToolName = (n: string): n is ToolName => n in inputs;
@@ -237,30 +225,6 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
           by,
           rows: g.rows.map((r) => (r.suppressed ? { group: r.group, result: "Too small to report" } : { group: r.group, n: r.n, completionBefore: r.completionBefore, completionAfter: r.completionAfter })),
         },
-      };
-    }
-
-    case "draft_documents": {
-      const score = requireStep(ctx.score, "Call score_patients before draft_documents.");
-      const findings = {
-        agentSummary: String(input.findings_summary),
-        trial: ctx.trial && { nctId: ctx.trial.nctId, title: ctx.trial.title, conditions: ctx.trial.conditions, dataSource: ctx.trial.sourceNote },
-        visits: score.scoredVisits.map(({ label, week, durationMinutes, fasting, timeOfDay, inPerson }) => ({ label, week, durationMinutes, fasting, timeOfDay, inPerson })),
-        materialsLanguages: ctx.schedule?.materialsLanguages ?? "unknown",
-        tierCounts: countBy(score.patients, (p) => p.tier),
-        patientsWithBarrierInTop3: countBy(score.patients, (p) => p.topBarriers.map((b) => b.key)),
-        recommendedSupportCounts: countBy(score.patients, (p) => p.recommendedSupports),
-        highNeedPatientIds: score.patients.filter((p) => p.tier === "High").map((p) => p.patientId),
-        simulation: ctx.sim?.result ?? "not run",
-        groups: Object.values(ctx.groups).map((g) => ({ by: g!.by, rows: g!.rows.map((r) => (r.suppressed ? { group: r.group, result: "Too small to report" } : { group: r.group, n: r.n, before: r.completionBefore, after: r.completionAfter })) })),
-        unknowns: score.unknownNotes,
-        assumptionsNote: "All weights and costs are scenario assumptions, not validated predictions.",
-      };
-      const drafts = await draftDocuments(findings);
-      ctx.drafts = drafts;
-      return {
-        summary: `${drafts.length} drafts ready; waiting for human approval`,
-        forModel: { drafts: drafts.map((d) => ({ id: d.id, title: d.title, characters: d.text.length })), status: "Pending human approval. The run stops here." },
       };
     }
   }

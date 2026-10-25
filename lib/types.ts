@@ -196,25 +196,6 @@ export interface GroupSummary {
   rows: GroupRow[];
 }
 
-// ---------- Drafts ----------
-
-export type DraftKind = "barrierReport" | "questions" | "accommodationRequest" | "participantSummary";
-export type DraftLanguage = "en" | "es" | "ht";
-
-export interface Draft {
-  id: string;
-  kind: DraftKind;
-  language: DraftLanguage;
-  title: string;
-  text: string;
-  needsNativeReview: boolean;
-}
-
-export interface Approval {
-  reviewer: string;
-  approvedAt: string;
-}
-
 // ---------- Agent run (POST /api/run, newline-delimited JSON) ----------
 
 export type ToolName =
@@ -223,8 +204,7 @@ export type ToolName =
   | "parse_patients"
   | "score_patients"
   | "simulate_supports"
-  | "summarize_groups"
-  | "draft_documents";
+  | "summarize_groups";
 
 export interface RunRequest {
   nctId: string;
@@ -233,7 +213,7 @@ export interface RunRequest {
   protocolText?: string;
 }
 
-export type RunStopReason = "approval_gate" | "needs_schedule" | "finished" | "iteration_cap" | "refusal" | "error";
+export type RunStopReason = "needs_schedule" | "finished" | "iteration_cap" | "refusal" | "error";
 
 export type AgentEvent =
   | { type: "step"; id: string; iteration: number; tool: ToolName; status: "running" | "done" | "error"; summary: string; input?: unknown; output?: unknown }
@@ -241,5 +221,4 @@ export type AgentEvent =
   | { type: "trial"; trial: TrialInfo }
   | { type: "schedule"; schedule: VisitSchedule }
   | { type: "simulation"; supports: SupportKey[] }
-  | { type: "drafts"; drafts: Draft[] }
   | { type: "done"; reason: RunStopReason; message: string };
