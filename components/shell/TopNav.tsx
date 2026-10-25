@@ -1,12 +1,11 @@
 "use client";
 
-export type Tab = "start" | "run" | "results" | "drafts";
+export type Tab = "start" | "run" | "results";
 
 const tabs: { id: Tab; label: string; short: string }[] = [
   { id: "start", label: "1. Start", short: "Start" },
   { id: "run", label: "2. Agent run", short: "Run" },
   { id: "results", label: "3. Results", short: "Results" },
-  { id: "drafts", label: "4. Drafts", short: "Drafts" },
 ];
 
 export function TopNav({ tab, onTab, enabled, subtitle }: {

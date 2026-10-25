@@ -39,7 +39,7 @@ const stopBorder = { ok: "border-ok/60", warn: "border-warn/60", bad: "border-ba
 export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
   run: RunState;
   onCancel: () => void;
-  onOpen: (tab: "results" | "drafts") => void;
+  onOpen: (tab: "results") => void;
   onPasteSchedule: () => void;
 }) {
   const last = run.items.at(-1);
@@ -115,9 +115,7 @@ export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
             {run.stop.reason === "needs_schedule" && <Button variant="primary" onClick={onPasteSchedule}>Paste visit schedule <ArrowRight {...ico} /></Button>}
-            {run.schedule?.scheduleFound && <Button variant="primary" onClick={() => onOpen("results")}>Open results <ArrowRight {...ico} /></Button>}
-            {run.drafts && <Button variant="primary" onClick={() => onOpen("drafts")}>Review drafts <ArrowRight {...ico} /></Button>}
-          </div>
+            {run.schedule?.scheduleFound && <Button variant="primary" onClick={() => onOpen("results")}>Open results <ArrowRight {...ico} /></Button>}          </div>
         </Card>
       )}
     </div>
