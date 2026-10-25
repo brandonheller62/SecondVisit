@@ -4,7 +4,7 @@
 
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { COST_UNKNOWN_CAVEAT, DEFAULT_ASSUMPTIONS, SUPPORT_LABELS, type Assumptions } from "../assumptions";
+import { COST_UNKNOWN_CAVEAT, DEFAULT_ASSUMPTIONS, type Assumptions } from "../assumptions";
 import { parsePatients } from "../scoring/parsePatients";
 import { scorePatients } from "../scoring/score";
 import { simulateSupports, summarizeGroups, type SimulationRun } from "../scoring/simulate";
@@ -104,6 +104,13 @@ export interface ToolOutcome {
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 
+const GROUP_WORDS: Record<GroupBy, string> = {
+  preferredLanguage: "language",
+  neighborhood: "neighborhood",
+  transport: "transport",
+  insurance: "insurance",
+};
+
 function countBy<T>(items: T[], key: (t: T) => string | string[]): Record<string, number> {
   const out: Record<string, number> = {};
   for (const it of items) for (const k of ([] as string[]).concat(key(it))) out[k] = (out[k] ?? 0) + 1;
@@ -126,7 +133,7 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
       ctx.trial = t;
       const miami = t.locations.filter((l) => /miami|hialeah|doral|homestead|kendall|coral gables|aventura|miami beach/i.test(l.city));
       return {
-        summary: `${t.nctId}: ${t.title.slice(0, 90)}${t.title.length > 90 ? "…" : ""} (${t.source === "live" ? "live" : "cached copy"})`,
+        summary: `${t.source === "live" ? "Loaded the trial from ClinicalTrials.gov" : "Loaded a saved copy of the trial"}${miami.length ? `, with ${miami.length} Miami-area site${miami.length === 1 ? "" : "s"}` : ""}.`,
         forModel: {
           nctId: t.nctId,
           title: t.title,
@@ -148,7 +155,9 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
       ctx.schedule = s;
       const unknownFields = s.visits.reduce((n, v) => n + [v.week, v.durationMinutes, v.fasting, v.timeOfDay, v.inPerson].filter((x) => x === "unknown").length, 0);
       return {
-        summary: s.scheduleFound ? `${s.visits.length} visits found; ${unknownFields} fields not stated (marked unknown)` : "No visit schedule in this text; paste the protocol schedule to continue",
+        summary: s.scheduleFound
+          ? `Found ${s.visits.length} visit${s.visits.length === 1 ? "" : "s"} in the trial schedule.${unknownFields ? " Some visit details aren't listed." : ""}`
+          : "Couldn't find a visit schedule. Paste it to continue.",
         forModel: { scheduleFound: s.scheduleFound, visits: s.visits, materialsLanguages: s.materialsLanguages, notes: s.notes, evidence: s.evidence },
       };
     }
@@ -158,7 +167,7 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
       if (!r.ok) throw new Error(r.error);
       ctx.patients = r.patients;
       return {
-        summary: `${r.quality.accepted} of ${r.quality.rows} rows accepted${r.quality.ignoredColumns.length ? `; ignored ${r.quality.ignoredColumns.join(", ")}` : ""}`,
+        summary: `Checked the patient list: ${r.quality.accepted} of ${r.quality.rows} patients usable.`,
         forModel: {
           patientCount: r.quality.accepted,
           rowsInFile: r.quality.rows,
@@ -184,7 +193,7 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
         })
         .sort((a, b) => b.meanFriction - a.meanFriction);
       return {
-        summary: `${tiers.High ?? 0} high, ${tiers.Medium ?? 0} medium, ${tiers.Low ?? 0} low support need across ${r.scoredVisits.length} scored visits`,
+        summary: `Ranked ${r.patients.length} patients: ${tiers.High ?? 0} high, ${tiers.Medium ?? 0} medium and ${tiers.Low ?? 0} low need.`,
         forModel: {
           patients: patients.length,
           scoredVisits: r.scoredVisits.length,
@@ -210,7 +219,9 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
       ctx.sim = sim;
       const r = sim.result;
       return {
-        summary: `${supports.map((s) => SUPPORT_LABELS[s].label).join(", ") || "No supports"}: completion ${pct(r.completionBefore)} without, ${pct(r.completionAfter)} with, for about $${r.totalSupportCost.toLocaleString("en-US")}`,
+        summary: supports.length
+          ? `Tried ${supports.length} support${supports.length === 1 ? "" : "s"}: ${pct(r.completionBefore)} finish without support, ${pct(r.completionAfter)} with.`
+          : `Tried no supports: ${pct(r.completionBefore)} finish.`,
         forModel: { ...r, note: "Scenario estimate from unvalidated assumptions, not a prediction." },
       };
     }
@@ -222,7 +233,7 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
       ctx.groups[by] = g;
       const hidden = g.rows.filter((r) => r.suppressed).length;
       return {
-        summary: `By ${by}: ${g.rows.length - hidden} groups reported, ${hidden} too small to report`,
+        summary: `Broke the results down by ${GROUP_WORDS[by]}${hidden ? ` (${hidden} group${hidden === 1 ? "" : "s"} too small to show)` : ""}.`,
         forModel: {
           by,
           rows: g.rows.map((r) => (r.suppressed ? { group: r.group, result: "Too small to report" } : { group: r.group, n: r.n, completionBefore: r.completionBefore, completionAfter: r.completionAfter })),
