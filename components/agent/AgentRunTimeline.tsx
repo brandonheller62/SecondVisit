@@ -26,7 +26,7 @@ const statusUi: Record<RunStep["status"], { Icon: PhosphorIcon; spin?: boolean; 
 };
 
 const stopTitle: Record<RunStopReason, string> = {
-  needs_schedule: "Visit schedule needed",
+  needs_schedule: "No visit schedule",
   finished: "Done",
   iteration_cap: "Stopped at the 12-step limit",
   refusal: "The model declined",
@@ -34,11 +34,10 @@ const stopTitle: Record<RunStopReason, string> = {
 };
 
 /** Live list of the steps the agent took, one plain sentence each. Raw tool input/output sits behind one toggle. */
-export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
+export function AgentRunTimeline({ run, onCancel, onOpen }: {
   run: RunState;
   onCancel: () => void;
   onOpen: (tab: "results") => void;
-  onPasteSchedule: () => void;
 }) {
   const [details, setDetails] = useState(false);
   const last = run.items.at(-1);
@@ -107,7 +106,6 @@ export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
             <p className="mt-1">{run.stop.message}</p>
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
-            {run.stop.reason === "needs_schedule" && <Button variant="primary" onClick={onPasteSchedule}>Paste visit schedule <ArrowRight {...ico} /></Button>}
             {run.schedule?.scheduleFound && <Button variant="primary" onClick={() => onOpen("results")}>Open results <ArrowRight {...ico} /></Button>}
           </div>
         </section>

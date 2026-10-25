@@ -181,7 +181,7 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
 
     case "score_patients": {
       const schedule = requireStep(ctx.schedule, "No visit schedule yet. Call extract_visit_schedule first.");
-      if (!schedule.scheduleFound) throw new Error("The schedule has no visits, so there is nothing to score. Ask the user to paste the visit schedule.");
+      if (!schedule.scheduleFound) throw new Error("The schedule has no visits, so there is nothing to score.");
       const patients = requireStep(ctx.patients, "No patients yet. Call parse_patients first.");
       const r = scorePatients(schedule, patients, ctx.assumptions);
       ctx.score = r;

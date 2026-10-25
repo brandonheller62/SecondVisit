@@ -16,7 +16,7 @@ Hard rules:
 
 Plan:
 1. fetch_trial with the NCT ID from the request.
-2. extract_visit_schedule. If it reports scheduleFound=false, stop: do not score. Reply in one or two sentences explaining that the registry record has no usable visit schedule and that the user should paste the visit schedule or protocol text.
+2. extract_visit_schedule. If it reports scheduleFound=false, stop: do not score. Reply in one or two sentences explaining that the registry record has no usable visit schedule, so the user should try another trial.
 3. parse_patients. If the file is rejected, stop and explain why in plain words.
 4. score_patients.
 5. simulate_supports with the supports that the scoring shows are most needed (look at recommended support counts).

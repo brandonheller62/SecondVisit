@@ -26,15 +26,12 @@ export interface PatientFile {
   parse: ParseResult;
 }
 
-export function StartPanel({ nctId, onNctId, file, onSample, onUpload, protocolText, onProtocolText, showProtocol, onRun, running, nctValid }: {
+export function StartPanel({ nctId, onNctId, file, onSample, onUpload, onRun, running, nctValid }: {
   nctId: string;
   onNctId: (v: string) => void;
   file: PatientFile | null;
   onSample: () => void;
   onUpload: (f: File) => void;
-  protocolText: string;
-  onProtocolText: (v: string) => void;
-  showProtocol: boolean;
   onRun: () => void;
   running: boolean;
   nctValid: boolean;
@@ -138,20 +135,6 @@ export function StartPanel({ nctId, onNctId, file, onSample, onUpload, protocolT
           </div>
         </Card>
       </div>
-
-      {showProtocol && (
-        <Card title="Visit schedule needed" subtitle="The registry doesn't list the visits. Paste the schedule and run again.">
-          <label htmlFor="protocol" className="sr-only">Visit schedule or protocol text</label>
-          <textarea
-            id="protocol"
-            value={protocolText}
-            onChange={(e) => onProtocolText(e.target.value)}
-            rows={8}
-            placeholder={"e.g. Screening (week -2): fasting labs, 2 hours, 8 AM.\nWeek 0 baseline: ECG, questionnaires, 3 hours…"}
-            className="w-full rounded-md border border-border bg-bg px-3 py-2 font-mono text-sm"
-          />
-        </Card>
-      )}
 
       <div className="flex flex-wrap items-center gap-4">
         <Button variant="primary" className="px-6 py-3 text-lg" disabled={!ready} onClick={onRun}>

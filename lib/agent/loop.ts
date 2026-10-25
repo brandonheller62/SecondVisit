@@ -53,7 +53,7 @@ export async function runAgent(req: RunRequest, emit: Emit, signal?: AbortSignal
     }
     if (toolUses.length === 0) {
       if (ctx.schedule && !ctx.schedule.scheduleFound) {
-        return done(emit, "needs_schedule", "The registry record has no usable visit schedule. Paste the visit schedule or protocol text and run again.");
+        return done(emit, "needs_schedule", "This trial's registry record doesn't list its visits, so it can't be scored. Try another trial.");
       }
       return done(emit, "finished", "Analysis finished. Open Results to see who to offer support first.");
     }
