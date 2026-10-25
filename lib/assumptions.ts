@@ -7,17 +7,18 @@ import type { BarrierKey, CompensationKind, ParticipantCompensation, SupportKey 
 
 export interface Assumptions {
   /**
-   * Per-visit weight w_k for each barrier term. Friction compounds across
-   * visits (P(complete) = product of (1 - f)), so per-visit weights are small:
-   * a barrier that hits all 8 visits of a trial at w = 0.06 alone gives
-   * risk = 1 - 0.94^8 = 0.39. Tuned so a 4-8 visit trial gives retention in the
-   * range trials usually report; more visits means more exposure and higher risk.
+   * Points per barrier, in the style of clinical risk scores: a patient's need
+   * score is the sum of the points of the barriers they have, at any visit.
+   * The barriers people most often name as the reason they miss visits get more.
    */
-  weights: Record<BarrierKey, number>;
+  points: Record<BarrierKey, number>;
   /** Off by default: past missed appointments can encode poverty, shift work and transit gaps rather than intent. */
   missedPriorEnabled: boolean;
   /** Exposure x for "medium" sub-conditions (e.g. 40-60 minute bus commute). "High" is always 1. */
   mediumLevel: number;
+  /** A barrier counts once its exposure reaches this (so medium sub-conditions count; cost counts at half the spare budget). */
+  countsAt: number;
+  /** Need level cutoffs on the points score. */
   tiers: { high: number; medium: number };
   unitCosts: {
     /** Miami-Dade Transit full fare per ride. */
@@ -60,8 +61,6 @@ export interface Assumptions {
     /** One-time translation of consent and materials, per missing language. */
     translationPerLanguage: number;
   };
-  /** Cost to recruit and onboard a replacement participant. Placeholder: set from your own site budget. */
-  replacementCostPerParticipant: number;
   /**
    * What the trial pays participants, from the consent form or the research team.
    * Unknown keeps the full cost (it may be overstated); known payments are
@@ -71,26 +70,25 @@ export interface Assumptions {
 }
 
 export const DEFAULT_ASSUMPTIONS: Assumptions = {
-  weights: {
+  points: {
     // Visit timing is the barrier participants name most often in retention
     // studies; a morning fasting visit after a night shift is the sharpest case.
-    scheduleClash: 0.06,
-    // Long transit trips repeat every visit; weighted a bit lower than a clash
-    // because people can sometimes borrow a ride.
-    transport: 0.04,
-    // Out-of-pocket cost relative to budget; fares and lost pay add up per visit.
-    cost: 0.04,
+    scheduleClash: 3,
+    // Long transit trips repeat every visit.
+    transport: 2,
     // No childcare for under-6s makes multi-hour visits hard to attend at all.
-    childcare: 0.04,
-    // A materials gap in the trial (not a trait of the person): consent forms,
-    // questionnaires and reminders the person cannot read.
-    languageAccess: 0.03,
-    // Kept small and off by default because it can encode socioeconomic bias.
-    missedPrior: 0.01,
+    childcare: 2,
+    // A gap in the trial's materials (not a trait of the person).
+    languageAccess: 2,
+    // Out-of-pocket cost of at least half a household's spare budget per visit.
+    cost: 1,
+    // Off by default because it can encode socioeconomic bias.
+    missedPrior: 1,
   },
   missedPriorEnabled: false,
   mediumLevel: 0.5,
-  tiers: { high: 0.35, medium: 0.15 },
+  countsAt: 0.5,
+  tiers: { high: 6, medium: 3 },
   unitCosts: {
     busFareOneWay: 2.25,
     mileageRatePerMile: 0.7,
@@ -113,7 +111,6 @@ export const DEFAULT_ASSUMPTIONS: Assumptions = {
     interpreterPerVisit: 75,
     translationPerLanguage: 1200,
   },
-  replacementCostPerParticipant: 20000,
   participantCompensation: { kind: "unknown", stipendPerVisit: null },
 };
 

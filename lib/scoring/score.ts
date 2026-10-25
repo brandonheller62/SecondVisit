@@ -1,9 +1,9 @@
-// Friction scoring. PURE CODE, no LLM, no I/O.
+// Need scoring. PURE CODE, no LLM, no I/O.
 //
-// For patient p and visit v:
-//   f(p,v) = 1 - prod_k (1 - w_k * x_k)       x_k in 0..1
-//   P(complete) = prod_v (1 - f(p,v))
-//   risk of leaving without support = 1 - P(complete)
+// A points score, like clinical risk scores: each barrier a patient has adds
+// fixed points (Assumptions.points), counted once no matter how many visits it
+// affects. need score = sum of those points; cutoffs give High/Medium/Low.
+// A barrier "has" a patient when its exposure x (0..1) reaches countsAt at any visit.
 //
 // Fairness rules enforced here: ethnicity, race and immigration status are
 // not inputs at all; neighborhood is never read; preferred language is only
@@ -38,7 +38,6 @@ export const NO_SUPPORTS: SupportSet = {
 export const BASELINE: Scenario = { supports: NO_SUPPORTS };
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
-const round = (n: number, d = 3) => Math.round(n * 10 ** d) / 10 ** d;
 const money = (n: number) => `$${Math.round(n)}`;
 
 /** Visits that count toward the score: in-person, or unknown when the assumption says so. */
@@ -104,7 +103,7 @@ export function visitTerms(p: Patient, v: Visit, ctx: TermContext): CellTerm[] {
   const add = (key: BarrierKey, x: number, reason: string) => {
     if (key === "missedPrior" && !a.missedPriorEnabled) return;
     const xx = clamp01(x);
-    if (xx > 0) terms.push({ key, x: xx, contribution: a.weights[key] * xx, reason });
+    if (xx > 0) terms.push({ key, x: xx, points: xx >= a.countsAt ? a.points[key] : 0, reason });
   };
 
   // schedule_clash: take the strongest sub-condition.
@@ -164,12 +163,13 @@ export function visitTerms(p: Patient, v: Visit, ctx: TermContext): CellTerm[] {
   return terms;
 }
 
-export function combine(terms: CellTerm[]): number {
-  return 1 - terms.reduce((keep, t) => keep * (1 - t.contribution), 1);
+/** Highest possible score with the current points (missed appointments only when switched on). */
+export function maxPoints(a: Assumptions): number {
+  return (Object.keys(a.points) as BarrierKey[]).reduce((s, k) => s + (k === "missedPrior" && !a.missedPriorEnabled ? 0 : a.points[k]), 0);
 }
 
-export function tierFor(risk: number, a: Assumptions): Tier {
-  return risk >= a.tiers.high ? "High" : risk >= a.tiers.medium ? "Medium" : "Low";
+export function tierFor(points: number, a: Assumptions): Tier {
+  return points >= a.tiers.high ? "High" : points >= a.tiers.medium ? "Medium" : "Low";
 }
 
 const BARRIER_TO_SUPPORT: Partial<Record<BarrierKey, SupportKey>> = {
@@ -206,11 +206,10 @@ export function supportCostFor(p: Patient, k: SupportKey, visits: Visit[], a: As
 
 /** Which supports address a patient's barriers, strongest first. Never one the trial already covers. */
 function recommend(p: Patient, best: Map<BarrierKey, PatientBarrier>, visits: Visit[], a: Assumptions): SupportKey[] {
-  const ranked = [...best.values()].sort((x, y) => y.contribution - x.contribution);
+  const ranked = [...best.values()].sort((x, y) => y.points - x.points);
   const out: SupportKey[] = [];
   const push = (k: SupportKey) => !out.includes(k) && out.push(k);
   for (const b of ranked) {
-    if (b.contribution < 0.02) continue;
     if (b.key === "cost") {
       // Pick the support that pays for the biggest part of the cost still left
       // after what the trial pays. Reimbursed travel never earns a ride voucher here.
@@ -233,22 +232,22 @@ export function scorePatients(schedule: Pick<VisitSchedule, "visits" | "material
   const scores: PatientScore[] = [];
 
   for (const p of patients) {
-    let pComplete = 1;
-    const best = new Map<BarrierKey, PatientBarrier>();
+    // Strongest visit per barrier; only barriers that count there go into the score.
+    const strongest = new Map<BarrierKey, { term: CellTerm; visit: Visit }>();
     for (const v of visits) {
       const terms = visitTerms(p, v, ctx);
-      const friction = combine(terms);
-      pComplete *= 1 - friction;
-      const dominant = terms.length ? terms.reduce((m, t) => (t.contribution > m.contribution ? t : m)).key : null;
-      matrix.push({ patientId: p.id, visitId: v.id, friction: round(friction), dominant, terms });
+      const dominant = terms.length ? terms.reduce((m, t) => (t.x > m.x ? t : m)).key : null;
+      matrix.push({ patientId: p.id, visitId: v.id, points: terms.reduce((s, t) => s + t.points, 0), dominant, terms });
       for (const t of terms) {
-        const prev = best.get(t.key);
-        if (!prev || t.contribution > prev.contribution) {
-          best.set(t.key, { key: t.key, visitId: v.id, visitLabel: v.label, contribution: round(t.contribution), reason: t.reason });
-        }
+        const prev = strongest.get(t.key);
+        if (!prev || t.x > prev.term.x) strongest.set(t.key, { term: t, visit: v });
       }
     }
-    const risk = 1 - pComplete;
+    const best = new Map<BarrierKey, PatientBarrier>();
+    for (const [key, { term, visit }] of strongest) {
+      if (term.points > 0) best.set(key, { key, visitId: visit.id, visitLabel: visit.label, points: term.points, reason: term.reason });
+    }
+    const points = [...best.values()].reduce((s, b) => s + b.points, 0);
     const costs = visits.map((v) => visitCost(p, v, a, NO_SUPPORTS));
     const cents = (n: number) => Math.round(n * 100) / 100;
     const avg = (pick: (c: (typeof costs)[number]) => number) => (costs.length ? cents(costs.reduce((s, c) => s + pick(c), 0) / costs.length) : 0);
@@ -256,10 +255,10 @@ export function scorePatients(schedule: Pick<VisitSchedule, "visits" | "material
     const recommendedSupports = recommend(p, best, visits, a);
     scores.push({
       patientId: p.id,
-      pComplete: round(pComplete),
-      risk: round(risk),
-      tier: tierFor(risk, a),
-      topBarriers: [...best.values()].sort((x, y) => y.contribution - x.contribution).slice(0, 3),
+      points,
+      maxPoints: maxPoints(a),
+      tier: tierFor(points, a),
+      topBarriers: [...best.values()].sort((x, y) => y.points - x.points),
       recommendedSupports,
       // Kept to the cent so the parts, the per-visit total and the all-visits total add up on screen.
       costPerVisit: cents(visitCostBreakdown.travel + visitCostBreakdown.lostWages + visitCostBreakdown.outOfPocket - visitCostBreakdown.compensation),
@@ -268,7 +267,7 @@ export function scorePatients(schedule: Pick<VisitSchedule, "visits" | "material
     });
   }
 
-  scores.sort((x, y) => y.risk - x.risk || x.patientId.localeCompare(y.patientId));
+  scores.sort((x, y) => y.points - x.points || x.patientId.localeCompare(y.patientId));
   return { patients: scores, matrix, scoredVisits: visits, unknownNotes: unknownNotes(schedule, visits, a) };
 }
 

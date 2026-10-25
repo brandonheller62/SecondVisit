@@ -50,7 +50,7 @@ const base: Patient = {
 const nightWorker: Patient = { ...base, id: "NIGHT", workSchedule: "night shift", transport: "bus/Metrorail only", commuteMinutes: 50 };
 const retiree: Patient = { ...base, id: "RETIREE", age: 70, occupation: "retired", workSchedule: "none", insurance: "Medicare", canTakeUnpaidTimeOff: "n/a" };
 
-const riskOf = (id: string, r: ReturnType<typeof scorePatients>) => r.patients.find((p) => p.patientId === id)!.risk;
+const riskOf = (id: string, r: ReturnType<typeof scorePatients>) => r.patients.find((p) => p.patientId === id)!.points;
 
 describe("scorePatients", () => {
   it("scores a patient the same when only neighborhood changes", () => {
@@ -113,7 +113,7 @@ describe("participant compensation", () => {
     participantCompensation: { kind, stipendPerVisit },
   });
   const costContribution = (r: ReturnType<typeof scorePatients>, id: string) =>
-    r.matrix.filter((c) => c.patientId === id).reduce((s, c) => s + (c.terms.find((t) => t.key === "cost")?.contribution ?? 0), 0);
+    r.matrix.filter((c) => c.patientId === id).reduce((s, c) => s + (c.terms.find((t) => t.key === "cost")?.x ?? 0), 0);
   // Long rideshare trips and no job: cost is all travel, so the cost barrier calls for ride vouchers.
   const rideshareRetiree: Patient = { ...retiree, id: "RIDE", transport: "rideshare", commuteMinutes: 60 };
 
@@ -173,7 +173,25 @@ describe("evening visits", () => {
     const c = sim.result.costs.find((x) => x.support === "eveningVisits")!;
     expect(c.patientsHelped).toBe(1);
     expect(c.cost).toBe(schedule.visits.length * DEFAULT_ASSUMPTIONS.supportCosts.eveningVisitPerVisit);
-    expect(sim.result.completionAfter).toBeGreaterThan(sim.result.completionBefore);
+    expect(sim.result.averagePointsAfter).toBeLessThan(sim.result.averagePointsBefore);
+  });
+});
+
+describe("points score", () => {
+  it("adds fixed points per barrier, once, and maps them to need levels", () => {
+    // Night shift + morning fasting visits (3), 50-minute bus (2), no childcare for a toddler (2), Creole materials gap (2).
+    const p: Patient = { ...nightWorker, id: "ALL", preferredLanguage: "Haitian Creole", childrenUnder6: 1, childcareAvailable: "no" };
+    const r = scorePatients(schedule, [p], DEFAULT_ASSUMPTIONS).patients[0];
+    const barriers = Object.fromEntries(r.topBarriers.map((b) => [b.key, b.points]));
+    expect(barriers).toMatchObject({ scheduleClash: 3, transport: 2, childcare: 2, languageAccess: 2 });
+    expect(r.points).toBe(r.topBarriers.reduce((s, b) => s + b.points, 0));
+    expect(r.maxPoints).toBe(10);
+    expect(r.tier).toBe("High");
+  });
+
+  it("does not grow with the number of visits", () => {
+    const longer: VisitSchedule = { ...schedule, visits: [...schedule.visits, visit("w36", 36, { fasting: true, timeOfDay: "morning" }), visit("w48", 48, { fasting: true, timeOfDay: "morning" })] };
+    expect(riskOf("NIGHT", scorePatients(longer, [nightWorker], DEFAULT_ASSUMPTIONS))).toBe(riskOf("NIGHT", scorePatients(schedule, [nightWorker], DEFAULT_ASSUMPTIONS)));
   });
 });
 
@@ -206,7 +224,7 @@ describe("groups", () => {
     const g = summarizeGroups(r.patients, sim.before, sim.after, "preferredLanguage");
     const pt = g.rows.find((row) => row.group === "Portuguese")!;
     expect(pt.suppressed).toBe(true);
-    expect(pt.completionBefore).toBeNull();
-    expect(sim.result.completionAfter).toBeGreaterThan(sim.result.completionBefore);
+    expect(pt.averagePointsBefore).toBeNull();
+    expect(sim.result.averagePointsAfter).toBeLessThan(sim.result.averagePointsBefore);
   });
 });

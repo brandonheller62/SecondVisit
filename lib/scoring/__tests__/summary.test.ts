@@ -78,7 +78,7 @@ describe("buildSummary", () => {
     const sim = simulateSupports(known, [nightWorker, rideshareRetiree], DEFAULT_ASSUMPTIONS, ["eveningVisits"]);
     const s = buildSummary(sim, DEFAULT_ASSUMPTIONS);
     expect(s.sentences[0]).toMatch(/^Of 2 patients, \d+ have high support need, \d+ medium and \d+ low\.$/);
-    expect(s.sentences[2]).toMatch(/completion goes from \d+% to \d+% in this scenario\./);
+    expect(s.sentences[2]).toMatch(/high need goes from \d+ patients? to \d+ patients?\./);
     expect(s.label).toBe(SUMMARY_LABEL);
   });
 

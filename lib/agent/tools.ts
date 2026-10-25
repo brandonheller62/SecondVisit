@@ -102,7 +102,6 @@ export interface ToolOutcome {
   summary: string;
 }
 
-const pct = (n: number) => `${Math.round(n * 100)}%`;
 
 const GROUP_WORDS: Record<GroupBy, string> = {
   preferredLanguage: "language",
@@ -189,19 +188,20 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
       const visitLoad = r.scoredVisits
         .map((v) => {
           const cells = r.matrix.filter((c) => c.visitId === v.id);
-          return { visit: v.label, meanFriction: Math.round((cells.reduce((s, c) => s + c.friction, 0) / (cells.length || 1)) * 1000) / 1000 };
+          return { visit: v.label, meanPoints: Math.round((cells.reduce((s, c) => s + c.points, 0) / (cells.length || 1)) * 10) / 10 };
         })
-        .sort((a, b) => b.meanFriction - a.meanFriction);
+        .sort((a, b) => b.meanPoints - a.meanPoints);
       return {
         summary: `Ranked ${r.patients.length} patients: ${tiers.High ?? 0} high, ${tiers.Medium ?? 0} medium and ${tiers.Low ?? 0} low need.`,
         forModel: {
           patients: patients.length,
           scoredVisits: r.scoredVisits.length,
           tierCounts: tiers,
-          meanRiskOfLeavingWithoutSupport: Math.round((r.patients.reduce((s, p) => s + p.risk, 0) / (r.patients.length || 1)) * 1000) / 1000,
+          scoring: "Need score = points for each barrier a patient has (schedule clash 3, transport 2, childcare 2, language 2, cost 1). High 6+, medium 3-5, low 0-2.",
+          meanNeedScore: Math.round((r.patients.reduce((s, p) => s + p.points, 0) / (r.patients.length || 1)) * 10) / 10,
           patientsWithBarrierInTop3: countBy(r.patients, (p) => p.topBarriers.map((b) => b.key)),
           recommendedSupportCounts: countBy(r.patients, (p) => p.recommendedSupports),
-          visitsByMeanFriction: visitLoad,
+          visitsByMeanPoints: visitLoad,
           top10PatientIdsByNeed: r.patients.slice(0, 10).map((p) => ({ id: p.patientId, tier: p.tier })),
           unknownNotes: r.unknownNotes,
           participantCompensation: ctx.assumptions.participantCompensation,
@@ -220,9 +220,9 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
       const r = sim.result;
       return {
         summary: supports.length
-          ? `Tried ${supports.length} support${supports.length === 1 ? "" : "s"}: ${pct(r.completionBefore)} finish without support, ${pct(r.completionAfter)} with.`
-          : `Tried no supports: ${pct(r.completionBefore)} finish.`,
-        forModel: { ...r, note: "Scenario estimate from unvalidated assumptions, not a prediction." },
+          ? `Tried ${supports.length} support${supports.length === 1 ? "" : "s"}: high need goes from ${r.tiersBefore.High} patient${r.tiersBefore.High === 1 ? "" : "s"} to ${r.tiersAfter.High}.`
+          : `Tried no supports: ${r.tiersBefore.High} patient${r.tiersBefore.High === 1 ? "" : "s"} at high need.`,
+        forModel: { ...r, note: "Need levels from a points score whose point values are assumptions, not a prediction of dropout." },
       };
     }
 
@@ -236,7 +236,7 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
         summary: `Broke the results down by ${GROUP_WORDS[by]}${hidden ? ` (${hidden} group${hidden === 1 ? "" : "s"} too small to show)` : ""}.`,
         forModel: {
           by,
-          rows: g.rows.map((r) => (r.suppressed ? { group: r.group, result: "Too small to report" } : { group: r.group, n: r.n, completionBefore: r.completionBefore, completionAfter: r.completionAfter })),
+          rows: g.rows.map((r) => (r.suppressed ? { group: r.group, result: "Too small to report" } : { group: r.group, n: r.n, averageNeedScoreBefore: r.averagePointsBefore, averageNeedScoreAfter: r.averagePointsAfter })),
         },
       };
     }

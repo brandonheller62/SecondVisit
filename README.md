@@ -1,6 +1,6 @@
 # Trial Mirror — YCI Hackathon, Oct 25, 2026
 
-> A retention-support agent for clinical trial teams in Miami-Dade: it reads a real trial's visit schedule, scores how much friction each already-eligible patient would face at each visit, and ranks who should be offered support first.
+> A retention-support agent for clinical trial teams in Miami-Dade: it reads a real trial's visit schedule, scores the barriers each already-eligible patient would face at the trial's visits, and ranks who should be offered support first.
 
 Miami AI-agent hackathon · Health & Wellbeing track.
 
@@ -12,7 +12,7 @@ Miami AI-agent hackathon · Health & Wellbeing track.
 
 ## The idea
 
-People who qualify for a trial still drop out when visits clash with night shifts, need two buses each way, cost a day's pay, have no childcare, or come with forms in a language they don't read. A research team uploads a CSV of **synthetic, de-identified** patients who are **already medically eligible**. The agent fetches the trial from ClinicalTrials.gov, extracts the visit schedule, scores friction per patient per visit, simulates supports (evening visits, ride vouchers, childcare stipend, interpreter + translated materials, wage & expense reimbursement), and summarizes by group.
+People who qualify for a trial still drop out when visits clash with night shifts, need two buses each way, cost a day's pay, have no childcare, or come with forms in a language they don't read. A research team uploads a CSV of **synthetic, de-identified** patients who are **already medically eligible**. The agent fetches the trial from ClinicalTrials.gov, extracts the visit schedule, scores each patient's barriers as points, simulates supports (evening visits, ride vouchers, childcare stipend, interpreter + translated materials, wage & expense reimbursement), and summarizes by group.
 
 **The score decides who gets help first. It is never used to exclude, deprioritize or reject anyone.** It never decides medical eligibility and gives no medical advice.
 
@@ -58,12 +58,23 @@ The patient CSV is held in memory for the request and never written to disk or l
 
 ## The algorithm
 
-For patient *p* and visit *v*, each barrier term *k* gets an exposure *x* between 0 and 1 and a weight *w*, and the visit's friction is **f(p,v) = 1 − ∏ₖ (1 − wₖ·xₖ)**. The terms are: **schedule clash** (morning or fasting visit after a night or irregular shift; a daytime visit for a day-shift worker with no time off; visits over 3 hours), **transport** (bus/Metrorail only, over 60 minutes = high, 40–60 = medium; long family rides = medium), **cost** (fare or mileage plus parking, lost pay for daytime visits, uninsured out-of-pocket, divided by a household's spare budget per visit), **childcare** (children under 6 and none available), **language access** (the trial's materials are not offered in the person's language, a gap in the trial and not a trait of the person) and **missed appointments** (off by default because it can encode socioeconomic bias). Across visits, **P(complete) = ∏ᵥ (1 − f(p,v))**, risk of leaving without support = 1 − P(complete), and tiers come from thresholds. Supports switch off the terms they address and the simulation re-scores. Race, ethnicity and immigration status are not inputs; neighborhood is used only for group reporting. All numbers live in `lib/assumptions.ts` with a reason for each and can be edited in the UI.
+A **points score**, the same pattern as clinical risk scores: each barrier a patient has adds fixed points, counted once however many visits it affects, and the total sets the need level.
+
+| Barrier | Points | Counts when |
+|---|---|---|
+| Schedule clash | 3 | Morning or fasting visit after a night or irregular shift; a daytime visit for a day-shift worker with no time off; visits over 3 hours |
+| Transport | 2 | Bus/Metrorail only and 40+ minutes each way; family ride over 60 minutes |
+| Childcare | 2 | Children under 6 and no childcare |
+| Language access | 2 | The trial's materials are not offered in the person's language (a gap in the trial, not a trait of the person) |
+| Cost | 1 | Fare or mileage plus parking, lost pay and uninsured costs, minus what the trial pays, reach half of a household's spare budget per visit |
+| Missed appointments | 1 | Off by default because it can encode socioeconomic bias |
+
+**Need score = sum of points** (out of 10 by default). **High 6+, Medium 3-5, Low 0-2.** Supports remove the barriers they address and the simulation re-scores, so Results shows how many patients sit at each need level without and with supports. Race, ethnicity and immigration status are not inputs; neighborhood is used only for group reporting. All points and cutoffs live in `lib/assumptions.ts` and can be edited in the UI.
 
 ## Limitations
 
-- **The weights are unvalidated assumptions.** Check them against a past trial's real dropout before any real use.
-- Risk compounds over visits, so trials with many visits push more people into High. Compare patients within a trial, not across trials.
+- **The point values are judgment calls, not validated.** Check them against a past trial's real dropout before any real use.
+- The score says who needs support most; it is not a predicted chance of dropping out.
 - Registry records rarely give visit times, durations or fasting; those show as "unknown". Unknown time of day is not scored as a morning clash, so need may be understated; unknown duration uses an assumed length; unknown in-person status is scored as in person.
 - The data has no paid-leave column; the default assumes hourly workers lose pay for daytime visits.
 - Synthetic demo data only. No medical questions are answered: talk to a clinician, or call 911 in an emergency.

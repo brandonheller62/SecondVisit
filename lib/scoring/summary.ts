@@ -5,7 +5,6 @@ import { BARRIER_LABELS, COST_UNKNOWN_CAVEAT, SUPPORT_LABELS, type Assumptions }
 import type { BarrierKey, PatientScore, ScoreResult, Visit } from "../types";
 import type { SimulationRun } from "./simulate";
 
-const pct = (n: number) => `${Math.round(n * 100)}%`;
 
 export const VISIT_FIELD_LABELS = {
   week: "visit weeks",
@@ -27,8 +26,8 @@ export function visitsDistinguishable(score: Pick<ScoreResult, "matrix">): boole
   const byPatient = new Map<string, number>();
   for (const c of score.matrix) {
     const first = byPatient.get(c.patientId);
-    if (first === undefined) byPatient.set(c.patientId, c.friction);
-    else if (Math.abs(first - c.friction) > 1e-9) return true;
+    if (first === undefined) byPatient.set(c.patientId, c.points);
+    else if (Math.abs(first - c.points) > 1e-9) return true;
   }
   return false;
 }
@@ -39,7 +38,7 @@ export function hardestVisit(score: Pick<ScoreResult, "matrix" | "scoredVisits">
   let best: { visit: Visit; mean: number } | null = null;
   for (const v of score.scoredVisits) {
     const cells = score.matrix.filter((c) => c.visitId === v.id);
-    const mean = cells.reduce((s, c) => s + c.friction, 0) / (cells.length || 1);
+    const mean = cells.reduce((s, c) => s + c.points, 0) / (cells.length || 1);
     if (!best || mean > best.mean) best = { visit: v, mean };
   }
   return best;
@@ -81,9 +80,10 @@ export function buildSummary(sim: SimulationRun, a: Assumptions): ResultsSummary
   const second = parts.join(" ");
 
   const r = sim.result;
+  const high = (n: number) => `${n} patient${n === 1 ? "" : "s"}`;
   const third = r.supports.length
-    ? `With ${r.supports.map((s) => SUPPORT_LABELS[s].label.toLowerCase()).join(", ")}, completion goes from ${pct(r.completionBefore)} to ${pct(r.completionAfter)} in this scenario.`
-    : `No supports are selected, so completion stays at ${pct(r.completionBefore)} in this scenario.`;
+    ? `With ${r.supports.map((s) => SUPPORT_LABELS[s].label.toLowerCase()).join(", ")}, high need goes from ${high(r.tiersBefore.High)} to ${high(r.tiersAfter.High)}.`
+    : `No supports are selected, so ${high(r.tiersBefore.High)} stay at high need.`;
 
   return { sentences: [first, second, third], label: SUMMARY_LABEL };
 }

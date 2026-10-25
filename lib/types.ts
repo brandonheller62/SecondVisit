@@ -124,17 +124,18 @@ export interface Scenario {
 
 export interface CellTerm {
   key: BarrierKey;
-  /** Raw exposure 0..1 before the weight. */
+  /** How strongly the barrier applies at this visit, 0..1. It counts once it reaches countsAt. */
   x: number;
-  /** w_k * x_k. */
-  contribution: number;
+  /** The barrier's points if it counts at this visit, else 0. */
+  points: number;
   reason: string;
 }
 
 export interface Cell {
   patientId: string;
   visitId: string;
-  friction: number;
+  /** Points of the barriers that count at this visit. */
+  points: number;
   dominant: BarrierKey | null;
   terms: CellTerm[];
 }
@@ -143,16 +144,18 @@ export interface PatientBarrier {
   key: BarrierKey;
   visitId: string;
   visitLabel: string;
-  contribution: number;
+  /** Points this barrier adds to the patient's score (it counts at least at one visit). */
+  points: number;
   reason: string;
 }
 
 export interface PatientScore {
   patientId: string;
-  pComplete: number;
-  /** Risk of leaving without support = 1 - P(complete). */
-  risk: number;
+  /** Need score: the points of every barrier this patient has, out of maxPoints. */
+  points: number;
+  maxPoints: number;
   tier: Tier;
+  /** The barriers that count, most points first. */
   topBarriers: PatientBarrier[];
   recommendedSupports: SupportKey[];
   /** Estimated out-of-pocket cost per in-person visit, before supports. */
@@ -168,7 +171,7 @@ export interface PatientScore {
 }
 
 export interface ScoreResult {
-  /** Sorted by risk, highest need first. */
+  /** Sorted by points, highest need first. */
   patients: PatientScore[];
   matrix: Cell[];
   /** Visits that count toward the score (in-person or unknown). */
@@ -185,10 +188,11 @@ export interface SupportCost {
 
 export interface SimulationResult {
   supports: SupportKey[];
-  expectedCompletersBefore: number;
-  expectedCompletersAfter: number;
-  completionBefore: number;
-  completionAfter: number;
+  /** Patients at each need level without and with the selected supports. */
+  tiersBefore: Record<Tier, number>;
+  tiersAfter: Record<Tier, number>;
+  averagePointsBefore: number;
+  averagePointsAfter: number;
   costs: SupportCost[];
   totalSupportCost: number;
 }
@@ -200,9 +204,9 @@ export interface GroupRow {
   group: string;
   n: number;
   suppressed: boolean;
-  /** null when suppressed ("Too small to report"). */
-  completionBefore: number | null;
-  completionAfter: number | null;
+  /** Average need score; null when suppressed ("Too small to report"). */
+  averagePointsBefore: number | null;
+  averagePointsAfter: number | null;
 }
 
 export interface GroupSummary {
