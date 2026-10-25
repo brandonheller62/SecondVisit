@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_ASSUMPTIONS } from "../../assumptions";
-import type { Patient, Visit, VisitSchedule } from "../../types";
+import { DEFAULT_ASSUMPTIONS, type Assumptions } from "../../assumptions";
+import type { ParticipantCompensation, Patient, Visit, VisitSchedule } from "../../types";
 import { parsePatients } from "../parsePatients";
 import { allSupports, scorePatients } from "../score";
 import { MIN_GROUP_SIZE, simulateSupports, summarizeGroups } from "../simulate";
@@ -102,8 +102,78 @@ describe("per-patient costs", () => {
     const sim = simulateSupports(schedule, r.patients, DEFAULT_ASSUMPTIONS, ["eveningVisits", "rideVouchers", "childcareStipend", "wageReimbursement"]);
     for (const p of sim.before.patients) {
       const b = p.visitCostBreakdown;
-      expect(b.travel + b.lostWages + b.outOfPocket).toBeCloseTo(p.costPerVisit, 2);
+      expect(b.travel + b.lostWages + b.outOfPocket - b.compensation).toBeCloseTo(p.costPerVisit, 2);
     }
+  });
+});
+
+describe("participant compensation", () => {
+  const withComp = (kind: ParticipantCompensation["kind"], stipendPerVisit: number | null = null): Assumptions => ({
+    ...DEFAULT_ASSUMPTIONS,
+    participantCompensation: { kind, stipendPerVisit },
+  });
+  const costContribution = (r: ReturnType<typeof scorePatients>, id: string) =>
+    r.matrix.filter((c) => c.patientId === id).reduce((s, c) => s + (c.terms.find((t) => t.key === "cost")?.contribution ?? 0), 0);
+  // Long rideshare trips and no job: cost is all travel, so the cost barrier calls for ride vouchers.
+  const rideshareRetiree: Patient = { ...retiree, id: "RIDE", transport: "rideshare", commuteMinutes: 60 };
+
+  it("defaults to unknown", () => {
+    expect(DEFAULT_ASSUMPTIONS.participantCompensation).toEqual({ kind: "unknown", stipendPerVisit: null });
+  });
+
+  it("gives the same score for unknown and none", () => {
+    const r = parsePatients(readFileSync("data/synthetic_patients.csv", "utf8"));
+    if (!r.ok) throw new Error(r.error);
+    expect(scorePatients(schedule, r.patients, withComp("none")).patients).toEqual(scorePatients(schedule, r.patients, withComp("unknown")).patients);
+  });
+
+  it("lowers cost-term contributions with a stipend", () => {
+    const people = [nightWorker, base, rideshareRetiree];
+    const without = scorePatients(schedule, people, withComp("none"));
+    const withStipend = scorePatients(schedule, people, withComp("stipend", 20));
+    for (const p of people) {
+      expect(costContribution(withStipend, p.id)).toBeLessThan(costContribution(without, p.id));
+      expect(riskOf(p.id, withStipend)).toBeLessThanOrEqual(riskOf(p.id, without));
+    }
+  });
+
+  it("subtracts nothing when the stipend amount is not entered", () => {
+    expect(scorePatients(schedule, [base], withComp("stipend", null)).patients).toEqual(scorePatients(schedule, [base], withComp("none")).patients);
+  });
+
+  it("does not recommend ride vouchers for cost when the trial reimburses travel", () => {
+    const before = scorePatients(schedule, [rideshareRetiree], withComp("none")).patients[0];
+    expect(before.recommendedSupports).toContain("rideVouchers");
+    const after = scorePatients(schedule, [rideshareRetiree], withComp("travelReimbursed")).patients[0];
+    expect(after.recommendedSupports).not.toContain("rideVouchers");
+    expect(after.visitCostBreakdown.compensation).toBeCloseTo(after.visitCostBreakdown.travel, 2);
+  });
+
+  // Drives an hour each way and loses a day shift's pay: cost calls for wage & expense reimbursement.
+  const dayWorker: Patient = { ...base, id: "DAY", commuteMinutes: 60 };
+
+  it("does not recommend wage reimbursement when the stipend already covers the cost", () => {
+    expect(scorePatients(schedule, [dayWorker], withComp("none")).patients[0].recommendedSupports).toContain("wageReimbursement");
+    const covered = scorePatients(schedule, [dayWorker], withComp("stipendAndTravel", 1000)).patients[0];
+    expect(covered.recommendedSupports).not.toContain("wageReimbursement");
+    expect(covered.costPerVisit).toBe(0);
+  });
+
+  it("does not charge for wage reimbursement the trial already pays", () => {
+    const people = [dayWorker];
+    const full = simulateSupports(schedule, people, withComp("none"), ["wageReimbursement"]).result.totalSupportCost;
+    const part = simulateSupports(schedule, people, withComp("stipend", 20), ["wageReimbursement"]).result.totalSupportCost;
+    expect(part).toBeLessThan(full);
+  });
+});
+
+describe("evening visits", () => {
+  it("are simulated and costed from eveningVisitPerVisit", () => {
+    const sim = simulateSupports(schedule, [nightWorker], DEFAULT_ASSUMPTIONS, ["eveningVisits"]);
+    const c = sim.result.costs.find((x) => x.support === "eveningVisits")!;
+    expect(c.patientsHelped).toBe(1);
+    expect(c.cost).toBe(schedule.visits.length * DEFAULT_ASSUMPTIONS.supportCosts.eveningVisitPerVisit);
+    expect(sim.result.completionAfter).toBeGreaterThan(sim.result.completionBefore);
   });
 });
 

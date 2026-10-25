@@ -4,11 +4,11 @@
 
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { DEFAULT_ASSUMPTIONS, SUPPORT_LABELS, type Assumptions } from "../assumptions";
+import { COST_UNKNOWN_CAVEAT, DEFAULT_ASSUMPTIONS, SUPPORT_LABELS, type Assumptions } from "../assumptions";
 import { parsePatients } from "../scoring/parsePatients";
 import { scorePatients } from "../scoring/score";
 import { simulateSupports, summarizeGroups, type SimulationRun } from "../scoring/simulate";
-import type { GroupBy, GroupSummary, Patient, ScoreResult, SupportKey, ToolName, TrialInfo, VisitSchedule } from "../types";
+import type { GroupBy, GroupSummary, ParticipantCompensation, Patient, ScoreResult, SupportKey, ToolName, TrialInfo, VisitSchedule } from "../types";
 import { GROUP_BYS, SUPPORT_KEYS } from "../types";
 import { extractVisitSchedule } from "./llm";
 import { fetchTrial, trialText } from "./trial";
@@ -25,10 +25,10 @@ export interface RunContext {
   groups: Partial<Record<GroupBy, GroupSummary>>;
 }
 
-export const newContext = (csv: string, protocolText?: string): RunContext => ({
+export const newContext = (csv: string, protocolText?: string, participantCompensation?: ParticipantCompensation): RunContext => ({
   csv,
   protocolText: protocolText?.trim() || undefined,
-  assumptions: DEFAULT_ASSUMPTIONS,
+  assumptions: participantCompensation ? { ...DEFAULT_ASSUMPTIONS, participantCompensation } : DEFAULT_ASSUMPTIONS,
   groups: {},
 });
 
@@ -195,6 +195,8 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
           visitsByMeanFriction: visitLoad,
           top10PatientIdsByNeed: r.patients.slice(0, 10).map((p) => ({ id: p.patientId, tier: p.tier })),
           unknownNotes: r.unknownNotes,
+          participantCompensation: ctx.assumptions.participantCompensation,
+          ...(ctx.assumptions.participantCompensation.kind === "unknown" && { costCaveat: COST_UNKNOWN_CAVEAT }),
         },
       };
     }

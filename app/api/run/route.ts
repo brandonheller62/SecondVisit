@@ -3,7 +3,8 @@
 // in this request's memory: it is never written to disk or logged.
 
 import { runAgent } from "@/lib/agent/loop";
-import type { AgentEvent, RunRequest } from "@/lib/types";
+import type { AgentEvent, ParticipantCompensation, RunRequest } from "@/lib/types";
+import { COMPENSATION_KINDS } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,12 +20,20 @@ export async function POST(request: Request) {
   } catch {
     return Response.json({ error: "Body must be JSON: { nctId, csv, protocolText? }" }, { status: 400 });
   }
-  const { nctId, csv, protocolText } = body;
+  const { nctId, csv, protocolText, participantCompensation: pc } = body;
   if (typeof nctId !== "string" || !nctId.trim()) return Response.json({ error: "nctId is required." }, { status: 400 });
   if (typeof csv !== "string" || !csv.trim()) return Response.json({ error: "csv is required." }, { status: 400 });
   if (csv.length > MAX_CSV_BYTES) return Response.json({ error: "CSV is larger than 2 MB." }, { status: 413 });
   if (protocolText !== undefined && (typeof protocolText !== "string" || protocolText.length > MAX_PROTOCOL_CHARS)) {
     return Response.json({ error: "protocolText must be text under 60,000 characters." }, { status: 400 });
+  }
+  let participantCompensation: ParticipantCompensation | undefined;
+  if (pc !== undefined) {
+    const stipend = pc?.stipendPerVisit;
+    if (!pc || !COMPENSATION_KINDS.includes(pc.kind) || !(stipend === null || stipend === undefined || (typeof stipend === "number" && Number.isFinite(stipend) && stipend >= 0))) {
+      return Response.json({ error: `participantCompensation must be { kind: ${COMPENSATION_KINDS.join(" | ")}, stipendPerVisit: number >= 0 or null }.` }, { status: 400 });
+    }
+    participantCompensation = { kind: pc.kind, stipendPerVisit: stipend ?? null };
   }
 
   const encoder = new TextEncoder();
@@ -32,7 +41,7 @@ export async function POST(request: Request) {
     async start(controller) {
       const emit = (e: AgentEvent) => controller.enqueue(encoder.encode(JSON.stringify(e) + "\n"));
       try {
-        await runAgent({ nctId, csv, protocolText }, emit, request.signal);
+        await runAgent({ nctId, csv, protocolText, participantCompensation }, emit, request.signal);
       } catch (e) {
         // Error text only; never the request body.
         emit({ type: "done", reason: "error", message: e instanceof Error ? e.message : "The agent run failed." });

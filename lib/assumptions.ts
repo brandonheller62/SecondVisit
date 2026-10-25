@@ -3,7 +3,7 @@
 // validated against real dropout data; check them against a past trial before
 // any real use.
 
-import type { BarrierKey, SupportKey } from "./types";
+import type { BarrierKey, CompensationKind, ParticipantCompensation, SupportKey } from "./types";
 
 export interface Assumptions {
   /**
@@ -62,6 +62,12 @@ export interface Assumptions {
   };
   /** Cost to recruit and onboard a replacement participant. Placeholder: set from your own site budget. */
   replacementCostPerParticipant: number;
+  /**
+   * What the trial pays participants, from the consent form or the research team.
+   * Unknown keeps the full cost (it may be overstated); known payments are
+   * subtracted from per-visit cost before it is compared with the spare budget.
+   */
+  participantCompensation: ParticipantCompensation;
 }
 
 export const DEFAULT_ASSUMPTIONS: Assumptions = {
@@ -108,7 +114,21 @@ export const DEFAULT_ASSUMPTIONS: Assumptions = {
     translationPerLanguage: 1200,
   },
   replacementCostPerParticipant: 20000,
+  participantCompensation: { kind: "unknown", stipendPerVisit: null },
 };
+
+export const COMPENSATION_LABELS: Record<CompensationKind, string> = {
+  unknown: "Unknown",
+  none: "No",
+  stipend: "Stipend",
+  travelReimbursed: "Travel reimbursed",
+  stipendAndTravel: "Both",
+};
+
+export const COST_UNKNOWN_CAVEAT = "Whether this trial pays participants is not stated, so cost may be overstated.";
+
+export const paysStipend = (c: ParticipantCompensation) => c.kind === "stipend" || c.kind === "stipendAndTravel";
+export const reimbursesTravel = (c: ParticipantCompensation) => c.kind === "travelReimbursed" || c.kind === "stipendAndTravel";
 
 export const BARRIER_LABELS: Record<BarrierKey, { label: string }> = {
   scheduleClash: { label: "Schedule clash" },

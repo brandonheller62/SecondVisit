@@ -9,7 +9,7 @@
 // not inputs at all; neighborhood is never read; preferred language is only
 // compared with the TRIAL's materials languages (a gap in the trial).
 
-import type { Assumptions } from "../assumptions";
+import { paysStipend, reimbursesTravel, type Assumptions } from "../assumptions";
 import type {
   BarrierKey,
   Cell,
@@ -53,7 +53,11 @@ export function materialsLanguages(schedule: Pick<VisitSchedule, "materialsLangu
 const isWorking = (p: Patient) => p.workSchedule !== "none";
 const durationOf = (v: Visit, a: Assumptions) => (isKnown(v.durationMinutes) ? v.durationMinutes : a.unknowns.durationMinutes);
 
-/** Itemised out-of-pocket cost for one visit, after the supports that pay for parts of it. */
+/**
+ * Itemised out-of-pocket cost for one visit, after the supports that pay for
+ * parts of it and then after what the trial itself pays (participantCompensation).
+ * compensation is the amount actually offset; total = parts - compensation.
+ */
 export function visitCost(p: Patient, v: Visit, a: Assumptions, s: SupportSet) {
   const u = a.unitCosts;
   const roundTripMin = p.commuteMinutes * 2;
@@ -76,7 +80,13 @@ export function visitCost(p: Patient, v: Visit, a: Assumptions, s: SupportSet) {
     lostWages = 0;
     travel = p.transport === "own car" ? 0 : travel; // mileage and parking reimbursed
   }
-  return { travel, lostWages, outOfPocket, total: travel + lostWages + outOfPocket };
+
+  // What the trial already pays. Unknown and "none" subtract nothing.
+  const comp = a.participantCompensation;
+  const travelPaid = reimbursesTravel(comp) ? travel : 0;
+  const stipendPaid = paysStipend(comp) ? Math.min(Math.max(0, comp.stipendPerVisit ?? 0), travel + lostWages + outOfPocket - travelPaid) : 0;
+  const compensation = travelPaid + stipendPaid;
+  return { travel, lostWages, outOfPocket, compensation, total: travel + lostWages + outOfPocket - compensation };
 }
 
 interface TermContext {
@@ -129,7 +139,12 @@ export function visitTerms(p: Patient, v: Visit, ctx: TermContext): CellTerm[] {
   // cost: out-of-pocket per visit relative to a household's spare budget.
   const c = visitCost(p, v, a, sup);
   if (c.total > 0) {
-    const parts = [c.travel && `${money(c.travel)} travel`, c.lostWages && `${money(c.lostWages)} lost pay`, c.outOfPocket && `${money(c.outOfPocket)} uninsured costs`].filter(Boolean);
+    const parts = [
+      c.travel && `${money(c.travel)} travel`,
+      c.lostWages && `${money(c.lostWages)} lost pay`,
+      c.outOfPocket && `${money(c.outOfPocket)} uninsured costs`,
+      c.compensation && `minus ${money(c.compensation)} the trial pays`,
+    ].filter(Boolean);
     add("cost", c.total / a.unitCosts.discretionaryBudgetPerVisit, `About ${money(c.total)} per visit (${parts.join(", ")})`);
   }
 
@@ -164,7 +179,6 @@ const BARRIER_TO_SUPPORT: Partial<Record<BarrierKey, SupportKey>> = {
   languageAccess: "interpreter",
 };
 
-/** Which supports address a patient's barriers, strongest first. */
 /**
  * What one support costs the site for one patient across the scored visits.
  * Only ever summed into site totals (supportCosts in simulate.ts). Support cost
@@ -182,14 +196,15 @@ export function supportCostFor(p: Patient, k: SupportKey, visits: Visit[], a: As
       return visits.length * sc.childcarePerVisit;
     case "interpreter":
       return visits.length * sc.interpreterPerVisit;
-    case "wageReimbursement":
-      return visits.reduce((sum, v) => {
-        const c = visitCost(p, v, a, NO_SUPPORTS);
-        return sum + c.lostWages + c.outOfPocket + (p.transport === "own car" ? c.travel : 0);
-      }, 0);
+    case "wageReimbursement": {
+      // Pays exactly the cost it removes in scoring, net of what the trial already pays.
+      const withIt = allSupports(["wageReimbursement"]);
+      return visits.reduce((sum, v) => sum + visitCost(p, v, a, NO_SUPPORTS).total - visitCost(p, v, a, withIt).total, 0);
+    }
   }
 }
 
+/** Which supports address a patient's barriers, strongest first. Never one the trial already covers. */
 function recommend(p: Patient, best: Map<BarrierKey, PatientBarrier>, visits: Visit[], a: Assumptions): SupportKey[] {
   const ranked = [...best.values()].sort((x, y) => y.contribution - x.contribution);
   const out: SupportKey[] = [];
@@ -197,10 +212,12 @@ function recommend(p: Patient, best: Map<BarrierKey, PatientBarrier>, visits: Vi
   for (const b of ranked) {
     if (b.contribution < 0.02) continue;
     if (b.key === "cost") {
-      // Pick the support that pays for the biggest part of the cost.
+      // Pick the support that pays for the biggest part of the cost still left
+      // after what the trial pays. Reimbursed travel never earns a ride voucher here.
       const c = visitCost(p, visits.find((v) => v.id === b.visitId)!, a, NO_SUPPORTS);
-      if (c.travel >= c.lostWages + c.outOfPocket && p.transport !== "own car") push("rideVouchers");
-      else push("wageReimbursement");
+      const travelLeft = reimbursesTravel(a.participantCompensation) ? 0 : c.travel;
+      if (travelLeft > 0 && travelLeft >= c.lostWages + c.outOfPocket && p.transport !== "own car") push("rideVouchers");
+      else if (supportCostFor(p, "wageReimbursement", visits, a) > 0) push("wageReimbursement");
     } else {
       const s = BARRIER_TO_SUPPORT[b.key];
       if (s) push(s);
@@ -235,7 +252,7 @@ export function scorePatients(schedule: Pick<VisitSchedule, "visits" | "material
     const costs = visits.map((v) => visitCost(p, v, a, NO_SUPPORTS));
     const cents = (n: number) => Math.round(n * 100) / 100;
     const avg = (pick: (c: (typeof costs)[number]) => number) => (costs.length ? cents(costs.reduce((s, c) => s + pick(c), 0) / costs.length) : 0);
-    const visitCostBreakdown = { travel: avg((c) => c.travel), lostWages: avg((c) => c.lostWages), outOfPocket: avg((c) => c.outOfPocket) };
+    const visitCostBreakdown = { travel: avg((c) => c.travel), lostWages: avg((c) => c.lostWages), outOfPocket: avg((c) => c.outOfPocket), compensation: avg((c) => c.compensation) };
     const recommendedSupports = recommend(p, best, visits, a);
     scores.push({
       patientId: p.id,
@@ -245,7 +262,7 @@ export function scorePatients(schedule: Pick<VisitSchedule, "visits" | "material
       topBarriers: [...best.values()].sort((x, y) => y.contribution - x.contribution).slice(0, 3),
       recommendedSupports,
       // Kept to the cent so the parts, the per-visit total and the all-visits total add up on screen.
-      costPerVisit: cents(visitCostBreakdown.travel + visitCostBreakdown.lostWages + visitCostBreakdown.outOfPocket),
+      costPerVisit: cents(visitCostBreakdown.travel + visitCostBreakdown.lostWages + visitCostBreakdown.outOfPocket - visitCostBreakdown.compensation),
       visitCostBreakdown,
       totalCost: cents(costs.reduce((s, c) => s + c.total, 0)),
     });

@@ -17,7 +17,7 @@ const done = (emit: Emit, reason: RunStopReason, message: string) => emit({ type
 export async function runAgent(req: RunRequest, emit: Emit, signal?: AbortSignal): Promise<void> {
   const client = getClient();
   const model = getModel();
-  const ctx = newContext(req.csv, req.protocolText);
+  const ctx = newContext(req.csv, req.protocolText, req.participantCompensation);
 
   const messages: Anthropic.MessageParam[] = [
     {

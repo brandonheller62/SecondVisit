@@ -106,6 +106,16 @@ export type SupportKey = (typeof SUPPORT_KEYS)[number];
 
 export type Tier = "High" | "Medium" | "Low";
 
+/** Whether the trial pays or reimburses participants. Set by the trial team and its ethics board; this tool never suggests amounts. */
+export const COMPENSATION_KINDS = ["unknown", "none", "stipend", "travelReimbursed", "stipendAndTravel"] as const;
+export type CompensationKind = (typeof COMPENSATION_KINDS)[number];
+
+export interface ParticipantCompensation {
+  kind: CompensationKind;
+  /** Per-visit stipend as stated in the consent form. null = not entered, so nothing is subtracted. */
+  stipendPerVisit: number | null;
+}
+
 export type SupportSet = Record<SupportKey, boolean>;
 
 export interface Scenario {
@@ -147,8 +157,12 @@ export interface PatientScore {
   recommendedSupports: SupportKey[];
   /** Estimated out-of-pocket cost per in-person visit, before supports. */
   costPerVisit: number;
-  /** What an average visit costs the patient, by component, in dollars and cents, before supports. Parts sum to costPerVisit. */
-  visitCostBreakdown: { travel: number; lostWages: number; outOfPocket: number };
+  /**
+   * What an average visit costs the patient, by component, in dollars and cents, before supports.
+   * compensation is what the trial pays back (stipend/travel reimbursement), so
+   * travel + lostWages + outOfPocket - compensation = costPerVisit.
+   */
+  visitCostBreakdown: { travel: number; lostWages: number; outOfPocket: number; compensation: number };
   /** The patient's own cost across all scored visits, before supports. */
   totalCost: number;
 }
@@ -211,6 +225,8 @@ export interface RunRequest {
   csv: string;
   /** Visit schedule or protocol text pasted by the user when the registry has none. */
   protocolText?: string;
+  /** Defaults to unknown. */
+  participantCompensation?: ParticipantCompensation;
 }
 
 export type RunStopReason = "needs_schedule" | "finished" | "iteration_cap" | "refusal" | "error";
