@@ -1,8 +1,8 @@
 // One icon family (Phosphor, bold weight) for the whole app. The /ssr entry
 // needs no context provider, so these work in server and client components.
 import type { Icon as PhosphorIcon, IconProps } from "@phosphor-icons/react";
-import { ArrowCounterClockwise, Baby, Bus, CaretDoubleUp, CaretUp, Clock, CurrencyDollar, Minus, Translate } from "@phosphor-icons/react/dist/ssr";
-import type { BarrierKey, Tier } from "@/lib/types";
+import { ArrowCounterClockwise, Baby, Bus, Clock, CurrencyDollar, Translate } from "@phosphor-icons/react/dist/ssr";
+import type { BarrierKey } from "@/lib/types";
 
 export type { PhosphorIcon };
 
@@ -18,18 +18,7 @@ export const BARRIER_ICONS: Record<BarrierKey, PhosphorIcon> = {
   missedPrior: ArrowCounterClockwise,
 };
 
-export const TIER_ICONS: Record<Tier, PhosphorIcon> = {
-  High: CaretDoubleUp,
-  Medium: CaretUp,
-  Low: Minus,
-};
-
 export function BarrierIcon({ barrier, className = "" }: { barrier: BarrierKey; className?: string }) {
   const Icon = BARRIER_ICONS[barrier];
   return <Icon {...ico} className={`${ico.className} ${className}`} />;
-}
-
-export function TierIcon({ tier }: { tier: Tier }) {
-  const Icon = TIER_ICONS[tier];
-  return <Icon {...ico} />;
 }
