@@ -5,7 +5,7 @@ import { AgentRunTimeline } from "@/components/agent/AgentRunTimeline";
 import { useAgentRun } from "@/components/agent/useAgentRun";
 import { DraftsView } from "@/components/drafts/DraftsView";
 import { ResultsView } from "@/components/results/ResultsView";
-import { SafetyBanner } from "@/components/shell/SafetyBanner";
+import { SafetyNote } from "@/components/shell/SafetyNote";
 import { TopNav, type Tab } from "@/components/shell/TopNav";
 import { StartPanel, type PatientFile } from "@/components/start/StartPanel";
 import { cloneAssumptions, type Assumptions } from "@/lib/assumptions";
@@ -32,7 +32,7 @@ export default function Home() {
 
   // Adopt what the agent chose, so the results open on the agent's simulation.
   useEffect(() => {
-    if (run.simulation) setScenario({ supports: allSupports(run.simulation.supports), stormWeek: run.simulation.stormWeek });
+    if (run.simulation) setScenario({ supports: allSupports(run.simulation.supports) });
   }, [run.simulation]);
   useEffect(() => {
     setDrafts(run.drafts);
@@ -43,8 +43,8 @@ export default function Home() {
   }, [run.stop]);
 
   const ranked = useMemo(
-    () => (schedule && patients ? scorePatients(schedule, patients, assumptions, { ...BASELINE, stormWeek: scenario.stormWeek }).patients : []),
-    [schedule, patients, assumptions, scenario.stormWeek],
+    () => (schedule && patients ? scorePatients(schedule, patients, assumptions, BASELINE).patients : []),
+    [schedule, patients, assumptions],
   );
 
   async function loadSample() {
@@ -77,7 +77,6 @@ export default function Home() {
         Skip to content
       </a>
       <div className="sticky top-0 z-30">
-        <SafetyBanner />
         <TopNav tab={tab} onTab={setTab} enabled={enabled} subtitle={run.trial ? `${run.trial.nctId} · ${run.trial.title}` : undefined} />
       </div>
       <main id="main" className="mx-auto max-w-7xl px-4 py-8">
@@ -110,6 +109,7 @@ export default function Home() {
         )}
         {tab === "drafts" && drafts && <DraftsView drafts={drafts} onDrafts={setDrafts} approval={approval} onApproval={setApproval} ranked={ranked} />}
       </main>
+      <SafetyNote />
     </div>
   );
 }

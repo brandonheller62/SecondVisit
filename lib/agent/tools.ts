@@ -68,9 +68,8 @@ export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
       type: "object",
       properties: {
         supports: { type: "array", items: { type: "string", enum: [...SUPPORT_KEYS] }, description: "Supports to turn on" },
-        storm_week: { type: "boolean", description: "Also simulate a storm closure week" },
       },
-      required: ["supports", "storm_week"],
+      required: ["supports"],
       additionalProperties: false,
     },
   },
@@ -101,7 +100,7 @@ const inputs = {
   extract_visit_schedule: z.object({}).passthrough(),
   parse_patients: z.object({}).passthrough(),
   score_patients: z.object({}).passthrough(),
-  simulate_supports: z.object({ supports: z.array(z.enum(SUPPORT_KEYS)), storm_week: z.boolean() }),
+  simulate_supports: z.object({ supports: z.array(z.enum(SUPPORT_KEYS)) }),
   summarize_groups: z.object({ group_by: z.enum(GROUP_BYS) }),
   draft_documents: z.object({ findings_summary: z.string() }),
 } satisfies Record<ToolName, z.ZodTypeAny>;
@@ -217,7 +216,7 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
       const patients = requireStep(ctx.patients, "No patients yet. Call parse_patients first.");
       if (!ctx.score) throw new Error("Call score_patients before simulate_supports.");
       const supports = input.supports as SupportKey[];
-      const sim = simulateSupports(schedule, patients, ctx.assumptions, supports, Boolean(input.storm_week));
+      const sim = simulateSupports(schedule, patients, ctx.assumptions, supports);
       ctx.sim = sim;
       const r = sim.result;
       return {

@@ -70,7 +70,6 @@ export function CostPanel({ result, assumptions, onAssumptions }: { result: Simu
           <NumberField label="Childcare per visit" prefix="$" value={sc.childcarePerVisit} onChange={(v) => setCost("childcarePerVisit", v)} />
           <NumberField label="Interpreter per visit" prefix="$" value={sc.interpreterPerVisit} onChange={(v) => setCost("interpreterPerVisit", v)} />
           <NumberField label="Translation per language" prefix="$" step={100} value={sc.translationPerLanguage} onChange={(v) => setCost("translationPerLanguage", v)} />
-          <NumberField label="Storm plan per person" prefix="$" value={sc.stormContingencyPerPatient} onChange={(v) => setCost("stormContingencyPerPatient", v)} />
           <NumberField label="Hourly wage (lost pay)" prefix="$" value={assumptions.unitCosts.hourlyWage} onChange={(v) => onAssumptions({ ...assumptions, unitCosts: { ...assumptions.unitCosts, hourlyWage: v } })} />
         </div>
       </div>

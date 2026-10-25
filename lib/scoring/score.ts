@@ -33,10 +33,9 @@ export const NO_SUPPORTS: SupportSet = {
   childcareStipend: false,
   interpreter: false,
   wageReimbursement: false,
-  stormContingency: false,
 };
 
-export const BASELINE: Scenario = { supports: NO_SUPPORTS, stormWeek: false };
+export const BASELINE: Scenario = { supports: NO_SUPPORTS };
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 const round = (n: number, d = 3) => Math.round(n * 10 ** d) / 10 ** d;
@@ -45,17 +44,6 @@ const money = (n: number) => `$${Math.round(n)}`;
 /** Visits that count toward the score: in-person, or unknown when the assumption says so. */
 export function scoredVisits(visits: Visit[], a: Assumptions): Visit[] {
   return visits.filter((v) => v.inPerson === true || (v.inPerson === "unknown" && a.unknowns.treatUnknownInPersonAsInPerson));
-}
-
-/**
- * Week of the simulated storm closure, or null if no follow-up visit has a known
- * week. Auto mode picks the middle follow-up visit; screening and baseline
- * (week 0 or earlier) are skipped, since a closure there is not a mid-trial storm.
- */
-export function stormWeekFor(visits: Visit[], a: Assumptions): number | null {
-  if (a.storm.closureWeek !== null) return a.storm.closureWeek;
-  const weeks = [...new Set(visits.map((v) => v.week).filter(isKnown).filter((w) => w > 0))].sort((x, y) => x - y);
-  return weeks.length ? weeks[Math.floor((weeks.length - 1) / 2)] : null;
 }
 
 export function materialsLanguages(schedule: Pick<VisitSchedule, "materialsLanguages">, a: Assumptions): string[] {
@@ -95,7 +83,6 @@ interface TermContext {
   a: Assumptions;
   s: Scenario;
   langs: string[];
-  stormWeek: number | null;
 }
 
 /** Barrier terms for one patient at one visit, each with its exposure x and a plain reason. */
@@ -156,13 +143,6 @@ export function visitTerms(p: Patient, v: Visit, ctx: TermContext): CellTerm[] {
     add("languageAccess", 1, `Trial materials not offered in ${p.preferredLanguage}`);
   }
 
-  // storm: only with the toggle on, only for the visit in the closure week.
-  if (s.stormWeek && ctx.stormWeek !== null && v.week === ctx.stormWeek) {
-    const noCar = p.transport !== "own car";
-    const base = noCar ? a.storm.noCarPenalty : a.storm.carPenalty;
-    add("storm", base * (sup.stormContingency ? a.storm.contingencyResidual : 1), `Clinic closed in week ${ctx.stormWeek}; visit must be rescheduled${noCar ? " without a car" : ""}`);
-  }
-
   // missed_prior: off by default.
   if (p.missedAppointments > 0) add("missedPrior", p.missedAppointments / 4, `${p.missedAppointments} missed appointments last year`);
 
@@ -182,7 +162,6 @@ const BARRIER_TO_SUPPORT: Partial<Record<BarrierKey, SupportKey>> = {
   transport: "rideVouchers",
   childcare: "childcareStipend",
   languageAccess: "interpreter",
-  storm: "stormContingency",
 };
 
 /** Which supports address a patient's barriers, strongest first. */
@@ -207,7 +186,7 @@ function recommend(p: Patient, best: Map<BarrierKey, PatientBarrier>, visits: Vi
 
 export function scorePatients(schedule: Pick<VisitSchedule, "visits" | "materialsLanguages">, patients: Patient[], a: Assumptions, s: Scenario = BASELINE): ScoreResult {
   const visits = scoredVisits(schedule.visits, a);
-  const ctx: TermContext = { a, s, langs: materialsLanguages(schedule, a), stormWeek: stormWeekFor(visits, a) };
+  const ctx: TermContext = { a, s, langs: materialsLanguages(schedule, a) };
   const matrix: Cell[] = [];
   const scores: PatientScore[] = [];
 
@@ -241,10 +220,10 @@ export function scorePatients(schedule: Pick<VisitSchedule, "visits" | "material
   }
 
   scores.sort((x, y) => y.risk - x.risk || x.patientId.localeCompare(y.patientId));
-  return { patients: scores, matrix, scoredVisits: visits, unknownNotes: unknownNotes(schedule, visits, a, ctx.stormWeek, s), stormWeekUsed: ctx.stormWeek };
+  return { patients: scores, matrix, scoredVisits: visits, unknownNotes: unknownNotes(schedule, visits, a) };
 }
 
-function unknownNotes(schedule: Pick<VisitSchedule, "visits" | "materialsLanguages">, visits: Visit[], a: Assumptions, stormWeek: number | null, s: Scenario): string[] {
+function unknownNotes(schedule: Pick<VisitSchedule, "visits" | "materialsLanguages">, visits: Visit[], a: Assumptions): string[] {
   const notes: string[] = [];
   const count = (pred: (v: Visit) => boolean) => visits.filter(pred).length;
   const n = (k: number) => `${k} of ${visits.length} visit${visits.length === 1 ? "" : "s"}`;
@@ -256,10 +235,7 @@ function unknownNotes(schedule: Pick<VisitSchedule, "visits" | "materialsLanguag
   if (dur) notes.push(`Duration is unknown for ${n(dur)}; ${a.unknowns.durationMinutes} minutes assumed for cost and lost pay.`);
   const inp = count((v) => v.inPerson === "unknown");
   if (inp) notes.push(`In-person status is unknown for ${n(inp)}; scored as in-person.`);
-  const wk = count((v) => v.week === "unknown");
-  if (wk) notes.push(`Week is unknown for ${n(wk)}; the storm scenario cannot place those visits.`);
   if (!isKnown(schedule.materialsLanguages)) notes.push(`The trial text does not list consent/material languages; assumed: ${a.defaultMaterialsLanguages.join(", ")}.`);
-  if (s.stormWeek && stormWeek === null) notes.push("Storm closure week is on, but no follow-up visit has a known week, so it has no effect.");
   return notes;
 }
 

@@ -20,7 +20,7 @@ export interface RunState {
   items: TimelineItem[];
   trial: TrialInfo | null;
   schedule: VisitSchedule | null;
-  simulation: { supports: SupportKey[]; stormWeek: boolean } | null;
+  simulation: { supports: SupportKey[] } | null;
   drafts: Draft[] | null;
   stop: { reason: RunStopReason; message: string } | null;
 }
@@ -44,7 +44,7 @@ function reduce(s: RunState, e: AgentEvent): RunState {
     case "schedule":
       return { ...s, schedule: e.schedule };
     case "simulation":
-      return { ...s, simulation: { supports: e.supports, stormWeek: e.stormWeek } };
+      return { ...s, simulation: { supports: e.supports } };
     case "drafts":
       return { ...s, drafts: e.drafts };
     case "done":

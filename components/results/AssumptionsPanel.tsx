@@ -1,7 +1,7 @@
 "use client";
 
 import { BARRIER_LABELS, DEFAULT_ASSUMPTIONS, cloneAssumptions, type Assumptions } from "@/lib/assumptions";
-import type { BarrierKey, MaybeUnknown, Visit } from "@/lib/types";
+import type { BarrierKey, MaybeUnknown } from "@/lib/types";
 import { BARRIER_KEYS, isKnown } from "@/lib/types";
 import { Badge, Button, Card, Toggle } from "@/components/shell/ui";
 import { NumberField } from "./NumberField";
@@ -14,19 +14,16 @@ const WEIGHT_NOTES: Record<BarrierKey, string> = {
   cost: "Travel, lost pay and uninsured costs vs a household's spare budget",
   childcare: "Children under 6 and no childcare",
   languageAccess: "Trial materials not in the person's language (a gap in the trial)",
-  storm: "Visit in the closure week must be rescheduled",
   missedPrior: "Past missed appointments. Off by default: can encode socioeconomic bias",
 };
 
-export function AssumptionsPanel({ assumptions, onAssumptions, visits, materialsFromTrial }: {
+export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTrial }: {
   assumptions: Assumptions;
   onAssumptions: (a: Assumptions) => void;
-  visits: Visit[];
   materialsFromTrial: MaybeUnknown<string[]>;
 }) {
   const a = assumptions;
   const set = (patch: Partial<Assumptions>) => onAssumptions({ ...a, ...patch });
-  const weeks = [...new Set(visits.map((v) => v.week).filter(isKnown))].sort((x, y) => x - y);
   const changed = JSON.stringify(a) !== JSON.stringify(DEFAULT_ASSUMPTIONS);
 
   return (
@@ -56,7 +53,7 @@ export function AssumptionsPanel({ assumptions, onAssumptions, visits, materials
               id={`w-${k}`}
               type="range"
               min={0}
-              max={k === "storm" ? 1 : 0.5}
+              max={0.5}
               step={0.01}
               value={a.weights[k]}
               disabled={k === "missedPrior" && !a.missedPriorEnabled}
@@ -108,20 +105,8 @@ export function AssumptionsPanel({ assumptions, onAssumptions, visits, materials
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold">Storm scenario</h3>
-          <label htmlFor="storm-week" className="mt-2 block text-sm font-medium">Closure week</label>
-          <select
-            id="storm-week"
-            value={a.storm.closureWeek ?? "auto"}
-            onChange={(e) => set({ storm: { ...a.storm, closureWeek: e.target.value === "auto" ? null : Number(e.target.value) } })}
-            className="mt-1 rounded-lg border border-line bg-bg px-3 py-2"
-          >
-            <option value="auto">Middle follow-up visit (auto)</option>
-            {weeks.map((w) => (
-              <option key={w} value={w}>Week {w}</option>
-            ))}
-          </select>
-          <div className="mt-3 grid gap-3">
+          <h3 className="text-lg font-semibold">Costs and unknowns</h3>
+          <div className="mt-2 grid gap-3">
             <NumberField label="Spare budget per visit" prefix="$" step={10} value={a.unitCosts.discretionaryBudgetPerVisit} onChange={(v) => set({ unitCosts: { ...a.unitCosts, discretionaryBudgetPerVisit: Math.max(1, v) } })} />
             <NumberField label="Unknown visit length" suffix="min" step={15} value={a.unknowns.durationMinutes} onChange={(v) => set({ unknowns: { ...a.unknowns, durationMinutes: v } })} />
           </div>

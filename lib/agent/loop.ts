@@ -74,7 +74,7 @@ export async function runAgent(req: RunRequest, emit: Emit, signal?: AbortSignal
           emit({ type: "step", id, iteration, tool, status: "done", summary: out.summary, input: use.input, output: out.forModel });
           if (tool === "fetch_trial" && ctx.trial) emit({ type: "trial", trial: ctx.trial });
           if (tool === "extract_visit_schedule" && ctx.schedule) emit({ type: "schedule", schedule: ctx.schedule });
-          if (tool === "simulate_supports" && ctx.sim) emit({ type: "simulation", supports: ctx.sim.result.supports, stormWeek: ctx.sim.result.stormWeek });
+          if (tool === "simulate_supports" && ctx.sim) emit({ type: "simulation", supports: ctx.sim.result.supports });
           if (tool === "draft_documents" && ctx.drafts) emit({ type: "drafts", drafts: ctx.drafts });
           return { type: "tool_result", tool_use_id: use.id, content: JSON.stringify(out.forModel) };
         } catch (e) {

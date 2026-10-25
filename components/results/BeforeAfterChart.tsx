@@ -33,7 +33,7 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
   return (
     <Card
       title="Completion with and without support"
-      subtitle={`Expected share who finish the trial. Scenario estimate, not a prediction.${r.stormWeek ? " Storm closure week is on." : ""}`}
+      subtitle="Expected share who finish the trial. Scenario estimate, not a prediction."
     >
       <div className="mb-4 flex flex-wrap gap-6">
         <div>

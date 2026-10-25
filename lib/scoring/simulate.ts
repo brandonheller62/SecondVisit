@@ -16,9 +16,9 @@ export interface SimulationRun {
 
 type Schedule = Pick<VisitSchedule, "visits" | "materialsLanguages">;
 
-export function simulateSupports(schedule: Schedule, patients: Patient[], a: Assumptions, supports: SupportKey[], stormWeek: boolean): SimulationRun {
-  const before = scorePatients(schedule, patients, a, { supports: NO_SUPPORTS, stormWeek });
-  const after = scorePatients(schedule, patients, a, { supports: allSupports(supports), stormWeek });
+export function simulateSupports(schedule: Schedule, patients: Patient[], a: Assumptions, supports: SupportKey[]): SimulationRun {
+  const before = scorePatients(schedule, patients, a, { supports: NO_SUPPORTS });
+  const after = scorePatients(schedule, patients, a, { supports: allSupports(supports) });
   const sum = (r: ScoreResult) => r.patients.reduce((s, p) => s + p.pComplete, 0);
   const n = patients.length || 1;
   const costs = supportCosts(schedule, patients, a, before, supports);
@@ -27,7 +27,6 @@ export function simulateSupports(schedule: Schedule, patients: Patient[], a: Ass
     after,
     result: {
       supports,
-      stormWeek,
       expectedCompletersBefore: round1(sum(before)),
       expectedCompletersAfter: round1(sum(after)),
       completionBefore: round3(sum(before) / n),
@@ -70,9 +69,6 @@ export function supportCosts(schedule: Schedule, patients: Patient[], a: Assumpt
             cost += c.lostWages + c.outOfPocket + (p.transport === "own car" ? c.travel : 0);
           }
         }
-        break;
-      case "stormContingency":
-        cost = helped.length * sc.stormContingencyPerPatient;
         break;
     }
     return { support: k, patientsHelped: helped.length, cost: Math.round(cost) };

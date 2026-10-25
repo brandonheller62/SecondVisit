@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_ASSUMPTIONS, cloneAssumptions } from "../../assumptions";
+import { DEFAULT_ASSUMPTIONS } from "../../assumptions";
 import type { Patient, Visit, VisitSchedule } from "../../types";
 import { parsePatients } from "../parsePatients";
-import { allSupports, NO_SUPPORTS, scorePatients, stormWeekFor } from "../score";
+import { allSupports, scorePatients } from "../score";
 import { MIN_GROUP_SIZE, simulateSupports, summarizeGroups } from "../simulate";
 
 const visit = (id: string, week: number, over: Partial<Visit> = {}): Visit => ({
@@ -68,20 +68,8 @@ describe("scorePatients", () => {
 
   it("lowers the night-shift worker's score when evening visits are on", () => {
     const before = scorePatients(schedule, [nightWorker], DEFAULT_ASSUMPTIONS);
-    const after = scorePatients(schedule, [nightWorker], DEFAULT_ASSUMPTIONS, { supports: allSupports(["eveningVisits"]), stormWeek: false });
+    const after = scorePatients(schedule, [nightWorker], DEFAULT_ASSUMPTIONS, { supports: allSupports(["eveningVisits"]) });
     expect(riskOf("NIGHT", after)).toBeLessThan(riskOf("NIGHT", before));
-  });
-
-  it("storm toggle only changes the visit in the closure week", () => {
-    const a = cloneAssumptions();
-    a.storm.closureWeek = 12;
-    const off = scorePatients(schedule, [nightWorker], a, { supports: NO_SUPPORTS, stormWeek: false });
-    const on = scorePatients(schedule, [nightWorker], a, { supports: NO_SUPPORTS, stormWeek: true });
-    for (const v of schedule.visits) {
-      const f = (r: typeof on) => r.matrix.find((c) => c.visitId === v.id)!.friction;
-      if (v.week === 12) expect(f(on)).toBeGreaterThan(f(off));
-      else expect(f(on)).toBe(f(off));
-    }
   });
 
   it("uses language only through the trial's materials gap", () => {
@@ -104,18 +92,6 @@ describe("scorePatients", () => {
     const r = scorePatients(unknown, [nightWorker], DEFAULT_ASSUMPTIONS);
     expect(r.matrix[0].terms.find((t) => t.key === "scheduleClash")).toBeUndefined();
     expect(r.unknownNotes.length).toBeGreaterThan(0);
-  });
-});
-
-describe("stormWeekFor", () => {
-  it("auto mode skips screening and baseline weeks", () => {
-    // Registry records often state only baseline (week 0) and one follow-up.
-    expect(stormWeekFor([visit("screening", -2), visit("baseline", 0), visit("w24", 24)], DEFAULT_ASSUMPTIONS)).toBe(24);
-    expect(stormWeekFor(schedule.visits, DEFAULT_ASSUMPTIONS)).toBe(12);
-  });
-
-  it("returns null when no follow-up week is known", () => {
-    expect(stormWeekFor([visit("baseline", 0)], DEFAULT_ASSUMPTIONS)).toBeNull();
   });
 });
 
@@ -144,7 +120,7 @@ describe("groups", () => {
   it(`suppresses groups under ${MIN_GROUP_SIZE}`, () => {
     const r = parsePatients(readFileSync("data/synthetic_patients.csv", "utf8"));
     if (!r.ok) throw new Error(r.error);
-    const sim = simulateSupports(schedule, r.patients, DEFAULT_ASSUMPTIONS, ["eveningVisits"], false);
+    const sim = simulateSupports(schedule, r.patients, DEFAULT_ASSUMPTIONS, ["eveningVisits"]);
     const g = summarizeGroups(r.patients, sim.before, sim.after, "preferredLanguage");
     const pt = g.rows.find((row) => row.group === "Portuguese")!;
     expect(pt.suppressed).toBe(true);

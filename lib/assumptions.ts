@@ -49,16 +49,6 @@ export interface Assumptions {
     /** Duration used for cost and lost wages when a visit's length is unknown. */
     durationMinutes: number;
   };
-  storm: {
-    /** Trial week the simulated closure hits; null = the week of the middle scored visit. */
-    closureWeek: number | null;
-    /** Reschedule penalty x for people without a car (bus routes cut, rides scarce after a storm). */
-    noCarPenalty: number;
-    /** Reschedule penalty x for people with their own car. */
-    carPenalty: number;
-    /** Share of the storm penalty left when a storm contingency plan is in place. */
-    contingencyResidual: number;
-  };
   supportCosts: {
     /** Round-trip ride voucher per visit. */
     rideVoucherPerVisit: number;
@@ -69,8 +59,6 @@ export interface Assumptions {
     interpreterPerVisit: number;
     /** One-time translation of consent and materials, per missing language. */
     translationPerLanguage: number;
-    /** Flexible rescheduling plus a backup ride, per affected patient. */
-    stormContingencyPerPatient: number;
   };
   /** Cost to recruit and onboard a replacement participant. Placeholder: set from your own site budget. */
   replacementCostPerParticipant: number;
@@ -91,8 +79,6 @@ export const DEFAULT_ASSUMPTIONS: Assumptions = {
     // A materials gap in the trial (not a trait of the person): consent forms,
     // questionnaires and reminders the person cannot read.
     languageAccess: 0.03,
-    // Hits only the visit in the closure week, so it can be large.
-    storm: 0.3,
     // Kept small and off by default because it can encode socioeconomic bias.
     missedPrior: 0.01,
   },
@@ -114,14 +100,12 @@ export const DEFAULT_ASSUMPTIONS: Assumptions = {
   irregularShiftOverlap: 0.5,
   defaultMaterialsLanguages: ["English"],
   unknowns: { treatUnknownInPersonAsInPerson: true, durationMinutes: 120 },
-  storm: { closureWeek: null, noCarPenalty: 1, carPenalty: 0.5, contingencyResidual: 0.3 },
   supportCosts: {
     rideVoucherPerVisit: 40,
     eveningVisitPerVisit: 60,
     childcarePerVisit: 50,
     interpreterPerVisit: 75,
     translationPerLanguage: 1200,
-    stormContingencyPerPatient: 35,
   },
   replacementCostPerParticipant: 20000,
 };
@@ -132,7 +116,6 @@ export const BARRIER_LABELS: Record<BarrierKey, { label: string; icon: string }>
   cost: { label: "Cost", icon: "$" },
   childcare: { label: "Childcare", icon: "👶" },
   languageAccess: { label: "Language access gap", icon: "文" },
-  storm: { label: "Storm closure", icon: "⛈" },
   missedPrior: { label: "Missed appointments", icon: "↺" },
 };
 
@@ -142,7 +125,6 @@ export const SUPPORT_LABELS: Record<SupportKey, { label: string; fixes: BarrierK
   childcareStipend: { label: "Childcare stipend", fixes: ["childcare"] },
   interpreter: { label: "Interpreter + translated materials", fixes: ["languageAccess"] },
   wageReimbursement: { label: "Wage & expense reimbursement", fixes: ["cost"] },
-  stormContingency: { label: "Storm plan", fixes: ["storm"] },
 };
 
 export const cloneAssumptions = (a: Assumptions = DEFAULT_ASSUMPTIONS): Assumptions => structuredClone(a);

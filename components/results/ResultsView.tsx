@@ -28,7 +28,7 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
 }) {
   const supportsOn = SUPPORT_KEYS.filter((k) => scenario.supports[k]);
   const sim = useMemo(
-    () => simulateSupports(schedule, patients, assumptions, supportsOn, scenario.stormWeek),
+    () => simulateSupports(schedule, patients, assumptions, supportsOn),
     // supportsOn is derived from scenario
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [schedule, patients, assumptions, scenario],
@@ -48,7 +48,7 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
       </div>
 
       <BeforeAfterChart sim={sim}>
-        <SupportToggles scenario={scenario} onScenario={onScenario} stormWeek={sim.before.stormWeekUsed} />
+        <SupportToggles scenario={scenario} onScenario={onScenario} />
       </BeforeAfterChart>
 
       <SupportList patients={sim.before.patients} />
@@ -59,7 +59,7 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
       </div>
 
       <CostPanel result={sim.result} assumptions={assumptions} onAssumptions={onAssumptions} />
-      <AssumptionsPanel assumptions={assumptions} onAssumptions={onAssumptions} visits={sim.before.scoredVisits} materialsFromTrial={schedule.materialsLanguages} />
+      <AssumptionsPanel assumptions={assumptions} onAssumptions={onAssumptions} materialsFromTrial={schedule.materialsLanguages} />
     </div>
   );
 }

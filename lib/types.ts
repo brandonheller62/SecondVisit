@@ -98,10 +98,10 @@ export type ParseResult =
 
 // ---------- Scoring ----------
 
-export const BARRIER_KEYS = ["scheduleClash", "transport", "cost", "childcare", "languageAccess", "storm", "missedPrior"] as const;
+export const BARRIER_KEYS = ["scheduleClash", "transport", "cost", "childcare", "languageAccess", "missedPrior"] as const;
 export type BarrierKey = (typeof BARRIER_KEYS)[number];
 
-export const SUPPORT_KEYS = ["eveningVisits", "rideVouchers", "childcareStipend", "interpreter", "wageReimbursement", "stormContingency"] as const;
+export const SUPPORT_KEYS = ["eveningVisits", "rideVouchers", "childcareStipend", "interpreter", "wageReimbursement"] as const;
 export type SupportKey = (typeof SUPPORT_KEYS)[number];
 
 export type Tier = "High" | "Medium" | "Low";
@@ -110,8 +110,6 @@ export type SupportSet = Record<SupportKey, boolean>;
 
 export interface Scenario {
   supports: SupportSet;
-  /** "Storm closure week" toggle. */
-  stormWeek: boolean;
 }
 
 export interface CellTerm {
@@ -159,7 +157,6 @@ export interface ScoreResult {
   scoredVisits: Visit[];
   /** Plain-language notes about unknown inputs and how they were handled. */
   unknownNotes: string[];
-  stormWeekUsed: number | null;
 }
 
 export interface SupportCost {
@@ -170,7 +167,6 @@ export interface SupportCost {
 
 export interface SimulationResult {
   supports: SupportKey[];
-  stormWeek: boolean;
   expectedCompletersBefore: number;
   expectedCompletersAfter: number;
   completionBefore: number;
@@ -240,6 +236,6 @@ export type AgentEvent =
   | { type: "message"; iteration: number; text: string }
   | { type: "trial"; trial: TrialInfo }
   | { type: "schedule"; schedule: VisitSchedule }
-  | { type: "simulation"; supports: SupportKey[]; stormWeek: boolean }
+  | { type: "simulation"; supports: SupportKey[] }
   | { type: "drafts"; drafts: Draft[] }
   | { type: "done"; reason: RunStopReason; message: string };
