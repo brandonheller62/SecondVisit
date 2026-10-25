@@ -11,7 +11,7 @@ export function LimitationsBox() {
         <li>The AI model sees only aggregates and patient IDs, never patient rows. Scoring, simulation and group summaries are plain code.</li>
         <li>Groups under 10 people are not reported.</li>
         <li>Neighborhood is used only for group reporting. Language matters only when the trial&apos;s materials are not offered in it. Race, ethnicity and immigration status are not inputs.</li>
-        <li>Registry records often lack visit details; anything not stated is shown as &quot;unknown&quot; and handled as described above the heatmap.</li>
+        <li>Registry records often lack visit details; anything not stated is treated as &quot;unknown&quot; and filled with the defaults in Assumptions.</li>
         <li>Spanish and Haitian Creole drafts are machine-drafted and need native-speaker/CHW review.</li>
         <li>This tool does not answer medical questions. For medical questions talk to a clinician; in an emergency call 911.</li>
       </ul>

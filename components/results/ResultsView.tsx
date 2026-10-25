@@ -6,12 +6,10 @@ import { simulateSupports, summarizeGroups } from "@/lib/scoring/simulate";
 import type { GroupBy, GroupSummary, Patient, Scenario, TrialInfo, VisitSchedule } from "@/lib/types";
 import { GROUP_BYS, SUPPORT_KEYS } from "@/lib/types";
 import { AssumptionsPanel } from "./AssumptionsPanel";
-import { BarrierHeatmap } from "./BarrierHeatmap";
 import { BeforeAfterChart } from "./BeforeAfterChart";
 import { CostPanel } from "./CostPanel";
 import { GroupTable } from "./GroupTable";
 import { LimitationsBox } from "./LimitationsBox";
-import { ScheduleCard } from "./ScheduleCard";
 import { SupportList } from "./SupportList";
 import { SupportToggles } from "./SupportToggles";
 
@@ -49,14 +47,11 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
         </p>
       </div>
 
-      <ScheduleCard schedule={schedule} unknownNotes={sim.before.unknownNotes} />
-
       <BeforeAfterChart sim={sim}>
         <SupportToggles scenario={scenario} onScenario={onScenario} stormWeek={sim.before.stormWeekUsed} />
       </BeforeAfterChart>
 
       <SupportList patients={sim.before.patients} />
-      <BarrierHeatmap score={sim.before} />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <GroupTable groups={groups} />
