@@ -6,6 +6,7 @@
 
 - Brandon Heller
 - Girish Raju
+- Mateo Gomez-Peck
 
 ## The idea
 
