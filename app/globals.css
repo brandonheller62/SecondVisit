@@ -35,8 +35,15 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* One accent only: blue is for the primary button and the "with support" bars.
-   Headings and everything else stay neutral. */
+/* Blue is for headings, the primary button and the "with support" bars; everything
+   else stays neutral. In the base layer so a text-* utility on a heading still wins. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    color: var(--color-primary);
+  }
+}
 
 :focus-visible {
   outline: 3px solid var(--color-text);
