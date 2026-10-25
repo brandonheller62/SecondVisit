@@ -10,7 +10,6 @@ import { GROUP_BYS, SUPPORT_KEYS } from "@/lib/types";
 import { ico } from "@/components/shell/icons";
 import { Badge, Card } from "@/components/shell/ui";
 import { AssumptionsPanel } from "./AssumptionsPanel";
-import { BarrierHeatmap } from "./BarrierHeatmap";
 import { BeforeAfterChart } from "./BeforeAfterChart";
 import { CostPanel } from "./CostPanel";
 import { GroupTable } from "./GroupTable";
@@ -73,15 +72,6 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
 
       <SupportList patients={sim.before.patients} visitCount={sim.before.scoredVisits.length} costUnknown={costUnknown} />
 
-      {distinguishable ? (
-        <BarrierHeatmap score={sim.before} limit={25} title="Which visits are hardest" costUnknown={costUnknown} />
-      ) : (
-        <Card title="Which visits are hardest">
-          <p className="text-lg">Visits cannot be told apart yet.</p>
-          <p className="mt-1 text-muted">Every visit scores the same for every patient, because the schedule does not say how the visits differ. Paste the visit schedule to compare them.</p>
-        </Card>
-      )}
-
       <BeforeAfterChart sim={sim}>
         <SupportToggles scenario={scenario} onScenario={onScenario} />
       </BeforeAfterChart>
@@ -94,7 +84,7 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-5 py-4 text-xl font-semibold [&::-webkit-details-marker]:hidden">
           <CaretRight {...ico} className={`${ico.className} transition-transform group-open:rotate-90`} />
           Advanced
-          <span className="text-sm font-normal text-muted">Assumptions, costs, how unknowns were handled, and every patient at every visit</span>
+          <span className="text-sm font-normal text-muted">Assumptions, costs, and how unknowns were handled</span>
         </summary>
         <div className="space-y-6 border-t border-line p-5">
           {sim.before.unknownNotes.length > 0 && (
@@ -106,11 +96,6 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
           )}
           <AssumptionsPanel assumptions={assumptions} onAssumptions={onAssumptions} materialsFromTrial={schedule.materialsLanguages} />
           <CostPanel result={sim.result} assumptions={assumptions} onAssumptions={onAssumptions} />
-          {distinguishable ? (
-            <BarrierHeatmap score={sim.before} title="Every patient at every visit" costUnknown={costUnknown} />
-          ) : (
-            <Card title="Every patient at every visit"><p>Visits cannot be told apart yet, so the full table would repeat the same number in every column.</p></Card>
-          )}
         </div>
       </details>
     </div>
