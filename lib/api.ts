@@ -91,7 +91,7 @@ export async function getRankedBarriers(trialId: string, scenario: Scenario, ass
     })
     .filter((r) => r.personaIds.length > 0)
     .sort((a, b) => b.load - a.load)
-    .map(({ load: _load, ...r }) => r);
+    .map((r): RankedBarrier => ({ id: r.id, visitId: r.visitId, label: r.label, reason: r.reason, personaIds: r.personaIds, maxFriction: r.maxFriction, suggestedFix: r.suggestedFix }));
   return delay(ranked);
 }
 
