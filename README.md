@@ -4,7 +4,7 @@
 
 ## Team
 
-- Brandon Heller ([@brandonheller62](https://github.com/brandonheller62))
+- Brandon Heller
 - Girish Raju
 - Mateo Gomez-Peck
 
