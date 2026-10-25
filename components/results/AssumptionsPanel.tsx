@@ -116,7 +116,7 @@ export function AssumptionsPanel({ assumptions, onAssumptions, visits, materials
             onChange={(e) => set({ storm: { ...a.storm, closureWeek: e.target.value === "auto" ? null : Number(e.target.value) } })}
             className="mt-1 rounded-lg border border-line bg-bg px-3 py-2"
           >
-            <option value="auto">Middle visit (auto)</option>
+            <option value="auto">Middle follow-up visit (auto)</option>
             {weeks.map((w) => (
               <option key={w} value={w}>Week {w}</option>
             ))}

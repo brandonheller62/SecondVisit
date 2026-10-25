@@ -20,7 +20,7 @@ export function SupportToggles({ scenario, onScenario, stormWeek }: { scenario: 
         checked={scenario.stormWeek}
         onChange={(v) => onScenario({ ...scenario, stormWeek: v })}
         label="⛈ Storm closure week"
-        hint={stormWeek === null ? "No visit has a known week" : `Clinic closed in week ${stormWeek}`}
+        hint={stormWeek === null ? "No follow-up visit has a known week" : `Clinic closed in week ${stormWeek}`}
       />
     </div>
   );

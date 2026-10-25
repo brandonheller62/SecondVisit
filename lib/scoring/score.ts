@@ -47,10 +47,14 @@ export function scoredVisits(visits: Visit[], a: Assumptions): Visit[] {
   return visits.filter((v) => v.inPerson === true || (v.inPerson === "unknown" && a.unknowns.treatUnknownInPersonAsInPerson));
 }
 
-/** Week of the simulated storm closure, or null if no scored visit has a known week. */
+/**
+ * Week of the simulated storm closure, or null if no follow-up visit has a known
+ * week. Auto mode picks the middle follow-up visit; screening and baseline
+ * (week 0 or earlier) are skipped, since a closure there is not a mid-trial storm.
+ */
 export function stormWeekFor(visits: Visit[], a: Assumptions): number | null {
   if (a.storm.closureWeek !== null) return a.storm.closureWeek;
-  const weeks = visits.map((v) => v.week).filter(isKnown).sort((x, y) => x - y);
+  const weeks = [...new Set(visits.map((v) => v.week).filter(isKnown).filter((w) => w > 0))].sort((x, y) => x - y);
   return weeks.length ? weeks[Math.floor((weeks.length - 1) / 2)] : null;
 }
 
@@ -255,7 +259,7 @@ function unknownNotes(schedule: Pick<VisitSchedule, "visits" | "materialsLanguag
   const wk = count((v) => v.week === "unknown");
   if (wk) notes.push(`Week is unknown for ${n(wk)}; the storm scenario cannot place those visits.`);
   if (!isKnown(schedule.materialsLanguages)) notes.push(`The trial text does not list consent/material languages; assumed: ${a.defaultMaterialsLanguages.join(", ")}.`);
-  if (s.stormWeek && stormWeek === null) notes.push("Storm closure week is on, but no visit has a known week, so it has no effect.");
+  if (s.stormWeek && stormWeek === null) notes.push("Storm closure week is on, but no follow-up visit has a known week, so it has no effect.");
   return notes;
 }
 

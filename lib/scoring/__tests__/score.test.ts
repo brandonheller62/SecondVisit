@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_ASSUMPTIONS, cloneAssumptions } from "../../assumptions";
 import type { Patient, Visit, VisitSchedule } from "../../types";
 import { parsePatients } from "../parsePatients";
-import { allSupports, NO_SUPPORTS, scorePatients } from "../score";
+import { allSupports, NO_SUPPORTS, scorePatients, stormWeekFor } from "../score";
 import { MIN_GROUP_SIZE, simulateSupports, summarizeGroups } from "../simulate";
 
 const visit = (id: string, week: number, over: Partial<Visit> = {}): Visit => ({
@@ -104,6 +104,18 @@ describe("scorePatients", () => {
     const r = scorePatients(unknown, [nightWorker], DEFAULT_ASSUMPTIONS);
     expect(r.matrix[0].terms.find((t) => t.key === "scheduleClash")).toBeUndefined();
     expect(r.unknownNotes.length).toBeGreaterThan(0);
+  });
+});
+
+describe("stormWeekFor", () => {
+  it("auto mode skips screening and baseline weeks", () => {
+    // Registry records often state only baseline (week 0) and one follow-up.
+    expect(stormWeekFor([visit("screening", -2), visit("baseline", 0), visit("w24", 24)], DEFAULT_ASSUMPTIONS)).toBe(24);
+    expect(stormWeekFor(schedule.visits, DEFAULT_ASSUMPTIONS)).toBe(12);
+  });
+
+  it("returns null when no follow-up week is known", () => {
+    expect(stormWeekFor([visit("baseline", 0)], DEFAULT_ASSUMPTIONS)).toBeNull();
   });
 });
 
