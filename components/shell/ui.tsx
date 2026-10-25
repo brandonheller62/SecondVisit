@@ -75,6 +75,24 @@ export function SyntheticTag() {
   );
 }
 
+/** Marks a figure that comes from the scoring assumptions, not from data. */
+export function ScenarioBadge() {
+  return (
+    <span title="Depends on unvalidated scenario assumptions" className="ml-1.5 inline-flex items-center rounded-full border border-warn/60 px-1.5 align-middle text-[0.65rem] font-semibold uppercase leading-4 tracking-wide text-warn">
+      scenario
+    </span>
+  );
+}
+
+/** Marks a number whose source is not in the repo. */
+export function AssumptionTag() {
+  return (
+    <span title="No source in the repo; set it from your own site's figures" className="ml-1.5 inline-flex items-center rounded-full border border-line px-1.5 align-middle text-[0.65rem] font-semibold uppercase leading-4 tracking-wide text-muted">
+      assumption
+    </span>
+  );
+}
+
 /** On/off switch with a visible state word, so state never relies on color. */
 export function Toggle({ checked, onChange, label, hint }: { checked: boolean; onChange: (v: boolean) => void; label: ReactNode; hint?: ReactNode }) {
   return (

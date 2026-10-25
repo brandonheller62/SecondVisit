@@ -12,7 +12,7 @@ const TOOL_LABEL: Record<ToolName, string> = {
   fetch_trial: "Fetch trial from ClinicalTrials.gov",
   extract_visit_schedule: "Extract visit schedule",
   parse_patients: "Validate patient file",
-  score_patients: "Score friction per patient and visit",
+  score_patients: "Score how hard each visit is for each patient",
   simulate_supports: "Simulate supports",
   summarize_groups: "Summarize by group",
 };

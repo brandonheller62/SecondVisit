@@ -4,7 +4,7 @@ import { BARRIER_LABELS, DEFAULT_ASSUMPTIONS, cloneAssumptions, type Assumptions
 import type { BarrierKey, MaybeUnknown } from "@/lib/types";
 import { BARRIER_KEYS, isKnown } from "@/lib/types";
 import { BarrierIcon } from "@/components/shell/icons";
-import { Badge, Button, Card, Toggle } from "@/components/shell/ui";
+import { AssumptionTag, Badge, Button, Card, Toggle } from "@/components/shell/ui";
 import { NumberField } from "./NumberField";
 
 const LANGUAGE_OPTIONS = ["English", "Spanish", "Haitian Creole", "Portuguese"];
@@ -30,7 +30,7 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
   return (
     <Card
       title="Assumptions"
-      subtitle="Scenario assumptions, not predictions. Every number is a knob; none has been validated against real dropout data."
+      subtitle="Every number here is an assumption: a knob, not a measured fact. None has been validated against real dropout data."
       actions={
         <div className="flex items-center gap-3">
           {changed && <Badge tone="warn">Edited</Badge>}
@@ -38,8 +38,8 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
         </div>
       }
     >
-      <h3 className="text-lg font-semibold">Barrier weights (per visit)</h3>
-      <p className="text-sm text-muted">Friction at a visit = 1 − product of (1 − weight × exposure). Friction compounds across visits.</p>
+      <h3 className="text-lg font-semibold">Barrier weights (per visit)<AssumptionTag /></h3>
+      <p className="text-sm text-muted">How hard a visit is = 1 − product of (1 − weight × exposure). It adds up across visits.</p>
       <div className="mt-3 grid gap-4 md:grid-cols-2">
         {BARRIER_KEYS.map((k) => (
           <div key={k} className="rounded-lg bg-bg p-3">
@@ -73,10 +73,10 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <div>
-          <h3 className="text-lg font-semibold">Tiers</h3>
+          <h3 className="text-lg font-semibold">Support need levels</h3>
           <div className="mt-2 grid gap-3">
-            <NumberField label="High need at risk ≥" step={0.05} max={1} value={a.tiers.high} onChange={(v) => set({ tiers: { ...a.tiers, high: Math.max(v, a.tiers.medium) } })} />
-            <NumberField label="Medium need at risk ≥" step={0.05} max={1} value={a.tiers.medium} onChange={(v) => set({ tiers: { ...a.tiers, medium: Math.min(v, a.tiers.high) } })} />
+            <NumberField assumption label="High when chance of needing help to stay ≥" step={0.05} max={1} value={a.tiers.high} onChange={(v) => set({ tiers: { ...a.tiers, high: Math.max(v, a.tiers.medium) } })} />
+            <NumberField assumption label="Medium when chance of needing help to stay ≥" step={0.05} max={1} value={a.tiers.medium} onChange={(v) => set({ tiers: { ...a.tiers, medium: Math.min(v, a.tiers.high) } })} />
           </div>
         </div>
 
@@ -108,8 +108,8 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
         <div>
           <h3 className="text-lg font-semibold">Costs and unknowns</h3>
           <div className="mt-2 grid gap-3">
-            <NumberField label="Spare budget per visit" prefix="$" step={10} value={a.unitCosts.discretionaryBudgetPerVisit} onChange={(v) => set({ unitCosts: { ...a.unitCosts, discretionaryBudgetPerVisit: Math.max(1, v) } })} />
-            <NumberField label="Unknown visit length" suffix="min" step={15} value={a.unknowns.durationMinutes} onChange={(v) => set({ unknowns: { ...a.unknowns, durationMinutes: v } })} />
+            <NumberField assumption label="Spare budget per visit" prefix="$" step={10} value={a.unitCosts.discretionaryBudgetPerVisit} onChange={(v) => set({ unitCosts: { ...a.unitCosts, discretionaryBudgetPerVisit: Math.max(1, v) } })} />
+            <NumberField assumption label="Unknown visit length" suffix="min" step={15} value={a.unknowns.durationMinutes} onChange={(v) => set({ unknowns: { ...a.unknowns, durationMinutes: v } })} />
           </div>
         </div>
       </div>

@@ -35,6 +35,21 @@ export default function Home() {
     if (run.stop?.reason === "needs_schedule") setShowProtocol(true);
   }, [run.stop]);
 
+  // "Paste the visit schedule" buttons: open Start, then scroll to and focus the paste box once it renders.
+  const [jumpToProtocol, setJumpToProtocol] = useState(false);
+  function pasteSchedule() {
+    setShowProtocol(true);
+    setTab("start");
+    setJumpToProtocol(true);
+  }
+  useEffect(() => {
+    if (!jumpToProtocol || tab !== "start") return;
+    const el = document.getElementById("protocol");
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    el?.focus({ preventScroll: true });
+    setJumpToProtocol(false);
+  }, [jumpToProtocol, tab]);
+
   async function loadSample() {
     const csv = await fetch("/api/sample-patients").then((r) => r.text());
     setFile({ name: "synthetic_patients.csv (sample)", csv, parse: parsePatients(csv) });
@@ -82,7 +97,7 @@ export default function Home() {
             running={run.status === "running"}
           />
         )}
-        {tab === "run" && <AgentRunTimeline run={run} onCancel={cancel} onOpen={setTab} onPasteSchedule={() => setTab("start")} />}
+        {tab === "run" && <AgentRunTimeline run={run} onCancel={cancel} onOpen={setTab} onPasteSchedule={pasteSchedule} />}
         {tab === "results" && schedule && patients && (
           <ResultsView
             trial={run.trial}
@@ -92,8 +107,12 @@ export default function Home() {
             onAssumptions={setAssumptions}
             scenario={scenario}
             onScenario={setScenario}
+            onPasteSchedule={pasteSchedule}
+            exampleSchedule={false}
+            replay={false}
           />
-        )}      </main>
+        )}
+      </main>
       <SafetyNote />
     </div>
   );

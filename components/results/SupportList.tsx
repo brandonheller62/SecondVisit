@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { BARRIER_LABELS, SUPPORT_LABELS } from "@/lib/assumptions";
+import { BARRIER_LABELS, COST_UNKNOWN_CAVEAT, SUPPORT_LABELS } from "@/lib/assumptions";
 import { fmtCents, fmtPct, tierStyle } from "@/lib/format";
 import type { PatientScore, Tier } from "@/lib/types";
 import { BarrierIcon, TierIcon } from "@/components/shell/icons";
-import { Badge, Button, Card, Chip, SyntheticTag } from "@/components/shell/ui";
+import { Badge, Button, Card, Chip, ScenarioBadge, SyntheticTag } from "@/components/shell/ui";
 
 const FILTERS: (Tier | "All")[] = ["All", "High", "Medium", "Low"];
 const PAGE = 15;
@@ -35,8 +35,9 @@ function PatientCost({ p, visits }: { p: PatientScore; visits: number }) {
     { label: "Travel", amount: b.travel },
     { label: "Lost pay", amount: b.lostWages },
     { label: "Uninsured costs", amount: b.outOfPocket },
-  ].filter((r) => r.amount > 0);
-  if (!parts.length) return <span className="text-muted">No out-of-pocket cost</span>;
+    { label: "Trial pays back", amount: -b.compensation },
+  ].filter((r) => r.amount !== 0);
+  if (!parts.length || p.costPerVisit === 0) return <span className="text-muted">No out-of-pocket cost</span>;
   return (
     <div className="space-y-2">
       <CostLines rows={parts} total={{ label: "Per visit", amount: p.costPerVisit }} fmt={fmtCents} />
@@ -48,7 +49,7 @@ function PatientCost({ p, visits }: { p: PatientScore; visits: number }) {
 }
 
 /** Ranked by need for support. The order decides who is offered help first, never who is excluded. */
-export function SupportList({ patients, visitCount }: { patients: PatientScore[]; visitCount: number }) {
+export function SupportList({ patients, visitCount, costUnknown }: { patients: PatientScore[]; visitCount: number; costUnknown: boolean }) {
   const [filter, setFilter] = useState<Tier | "All">("All");
   const [shown, setShown] = useState(PAGE);
   const rows = filter === "All" ? patients : patients.filter((p) => p.tier === filter);
@@ -61,7 +62,7 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
       title="Ranked support list"
       subtitle="Who to offer support first, and what the trial's visits cost each person. This order is never used to exclude, deprioritize or reject anyone."
       actions={
-        <div role="group" aria-label="Filter by tier" className="flex flex-wrap gap-1">
+        <div role="group" aria-label="Filter by support need" className="flex flex-wrap gap-1">
           {FILTERS.map((f) => (
             <Chip
               key={f}
@@ -77,6 +78,7 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
         </div>
       }
     >
+      {costUnknown && <p className="mb-3 text-warn">{COST_UNKNOWN_CAVEAT}</p>}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1040px] text-left">
           <caption className="sr-only">Patients ranked by need for support to stay in the trial</caption>
@@ -84,7 +86,7 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
             <tr className="border-b border-line">
               <th scope="col" className="py-2 pr-3 font-medium">#</th>
               <th scope="col" className="py-2 pr-3 font-medium">Patient</th>
-              <th scope="col" className="py-2 pr-3 font-medium">Support need</th>
+              <th scope="col" className="py-2 pr-3 font-medium">Support need<ScenarioBadge /></th>
               <th scope="col" className="py-2 pr-3 font-medium">Top barriers (visit)</th>
               <th scope="col" className="py-2 pr-8 font-medium">What visits cost them</th>
               <th scope="col" className="py-2 font-medium">Recommended supports</th>
@@ -103,7 +105,7 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
                     <TierIcon tier={p.tier} /> {p.tier}
                   </Badge>
                   <div className="mt-1 text-sm text-muted">
-                    {fmtPct(p.risk)} risk of leaving without support
+                    {fmtPct(p.risk)} chance of needing help to stay
                   </div>
                 </td>
                 <td className="py-3 pr-3">

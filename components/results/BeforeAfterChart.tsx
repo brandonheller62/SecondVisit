@@ -7,10 +7,10 @@ import type { SimulationRun } from "@/lib/scoring/simulate";
 import type { Tier } from "@/lib/types";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { ico } from "@/components/shell/icons";
-import { Card, useThemeColors } from "@/components/shell/ui";
+import { Card, ScenarioBadge, useThemeColors } from "@/components/shell/ui";
 
 
-/** Expected completion with and without the selected supports, overall and by baseline tier. */
+/** Expected completion with and without the selected supports, overall and by baseline support need. */
 export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; children?: React.ReactNode }) {
   const after = new Map(sim.after.patients.map((p) => [p.patientId, p.pComplete]));
   const groups: { name: string; filter: (t: Tier) => boolean }[] = [
@@ -34,12 +34,12 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
 
   return (
     <Card
-      title="Completion with and without support"
-      subtitle="Expected share who finish the trial. Scenario estimate, not a prediction."
+      title={<>Completion with and without support<ScenarioBadge /></>}
+      subtitle="Expected share who finish the trial under the scenario assumptions. Turn supports on or off to compare."
     >
       <div className="mb-4 flex flex-wrap gap-6">
         <div>
-          <div className="text-sm text-muted">Expected to finish</div>
+          <div className="text-sm text-muted">Expected to finish<ScenarioBadge /></div>
           <div className="flex items-center gap-2 text-3xl font-bold tabular-nums">
             {r.expectedCompletersBefore}
             <ArrowRight {...ico} className={`${ico.className} text-muted`} />

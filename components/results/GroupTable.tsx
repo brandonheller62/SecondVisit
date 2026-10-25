@@ -5,7 +5,7 @@ import { fmtPct, TOO_SMALL } from "@/lib/format";
 import { MIN_GROUP_SIZE } from "@/lib/scoring/simulate";
 import type { GroupBy, GroupSummary } from "@/lib/types";
 import { GROUP_BYS } from "@/lib/types";
-import { Card, Chip } from "@/components/shell/ui";
+import { Card, Chip, ScenarioBadge } from "@/components/shell/ui";
 
 const LABEL: Record<GroupBy, string> = {
   preferredLanguage: "Language",
@@ -44,8 +44,8 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
             <tr className="border-b border-line">
               <th scope="col" className="py-2 pr-3 font-medium">{LABEL[by]}</th>
               <th scope="col" className="py-2 pr-3 font-medium">People</th>
-              <th scope="col" className="py-2 pr-3 font-medium">Without supports</th>
-              <th scope="col" className="py-2 pr-3 font-medium">With supports</th>
+              <th scope="col" className="py-2 pr-3 font-medium">Without supports<ScenarioBadge /></th>
+              <th scope="col" className="py-2 pr-3 font-medium">With supports<ScenarioBadge /></th>
               <th scope="col" className="py-2 font-medium">Change</th>
             </tr>
           </thead>
