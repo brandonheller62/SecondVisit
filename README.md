@@ -5,7 +5,8 @@
 ## Team
 
 - Brandon Heller ([@brandonheller62](https://github.com/brandonheller62))
-- _Teammate_
+- Girish Raju
+- Mateo Gomez-Peck
 
 ## The idea
 
