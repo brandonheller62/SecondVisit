@@ -18,7 +18,7 @@ People who qualify for a trial still drop out when visits clash with night shift
 
 ## Stack
 
-Next.js 15 (App Router) + TypeScript + Tailwind 4 + Recharts. Anthropic SDK (`@anthropic-ai/sdk`) for the agent, called from server routes only. Vitest for unit tests. No database.
+Next.js 15 (App Router) + TypeScript + Tailwind 4. Anthropic SDK (`@anthropic-ai/sdk`) for the agent, called from server routes only. Vitest for unit tests. No database.
 
 ## Running locally
 

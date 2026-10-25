@@ -1,28 +1,9 @@
 import { Flask, Info } from "@phosphor-icons/react/dist/ssr";
-import { useId, useSyncExternalStore, type ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { ico } from "./icons";
 
 // Radius rule: controls and inputs rounded-md (6px), selectable options rounded-lg (8px), badges and switches pill.
 // Sections are separated by spacing and a thin top divider, never a box, so nothing nests card-in-card.
-
-const TOKENS = ["primary", "baseline", "text", "muted", "border", "surface", "surface-2"] as const;
-type Token = (typeof TOKENS)[number];
-let tokenCache: Record<Token, string> | null = null;
-
-function readTokens(): Record<Token, string> {
-  if (!tokenCache) {
-    const css = getComputedStyle(document.documentElement);
-    tokenCache = Object.fromEntries(TOKENS.map((t) => [t, css.getPropertyValue(`--color-${t}`).trim()])) as Record<Token, string>;
-  }
-  return tokenCache;
-}
-
-const noTokens = Object.fromEntries(TOKENS.map((t) => [t, "currentColor"])) as Record<Token, string>;
-
-/** Theme colors for chart libraries that need literal values instead of classes. */
-export function useThemeColors(): Record<Token, string> {
-  return useSyncExternalStore(() => () => {}, readTokens, () => noTokens);
-}
 
 // Small shared building blocks. Keep these dumb; feature logic lives in the
 // coordinator/chw/agent folders.

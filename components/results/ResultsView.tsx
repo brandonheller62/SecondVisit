@@ -10,7 +10,6 @@ import { GROUP_BYS, SUPPORT_KEYS } from "@/lib/types";
 import { ico } from "@/components/shell/icons";
 import { Card } from "@/components/shell/ui";
 import { AssumptionsPanel } from "./AssumptionsPanel";
-import { BeforeAfterChart } from "./BeforeAfterChart";
 import { CostPanel } from "./CostPanel";
 import { GroupTable } from "./GroupTable";
 import { LimitationsBox } from "./LimitationsBox";
@@ -63,9 +62,12 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
 
       <SupportList patients={sim.before.patients} visitCount={sim.before.scoredVisits.length} />
 
-      <BeforeAfterChart sim={sim}>
+      <Card title="Supports" subtitle="Turn on the supports you can offer. The group table and costs update.">
         <SupportToggles scenario={scenario} onScenario={onScenario} />
-      </BeforeAfterChart>
+        <p className="mt-4">
+          High need: {sim.result.tiersBefore.High} patient{sim.result.tiersBefore.High === 1 ? "" : "s"} without support, {sim.result.tiersAfter.High} with.
+        </p>
+      </Card>
 
       <GroupTable groups={groups} />
 

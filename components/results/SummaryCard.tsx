@@ -3,7 +3,7 @@ import { Card } from "@/components/shell/ui";
 
 /**
  * Sentences built in code from the numbers (lib/scoring/summary.ts), never by the model.
- * The third sentence (completion change) is shown once, as the headline next to the chart.
+ * The third sentence (the change with supports) is shown once, under the support toggles.
  */
 export function SummaryCard({ summary }: { summary: ResultsSummary }) {
   const [need, barrier] = summary.sentences;
