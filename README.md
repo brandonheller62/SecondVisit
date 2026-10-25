@@ -82,26 +82,3 @@ A **points score**, the same pattern as clinical risk scores: each barrier a pat
 ## Responsible AI
 
 Synthetic demo data only · uploads must be de-identified, and identifying columns are rejected · rows are never stored or logged · the LLM sees aggregates and patient IDs only · no eligibility decisions · no medical answers · groups under 10 suppressed · limitations box in the UI.
-
-## Who owns what
-
-Agree on `lib/types.ts` first, then change it only by announcement. Pull right before editing a shared file, keep the change small, push right away.
-
-| Area | Owner | Files |
-| --- | --- | --- |
-| Agent | Girish | `app/api/run/route.ts`, `app/api/sample-patients/route.ts`, `lib/agent/*` (loop, tools, prompts, trial fetch) |
-| Algorithm | Mateo | `lib/scoring/*`, `lib/assumptions.ts`, `lib/scoring/__tests__/*` |
-| UI | Brandon | `components/*`, `app/page.tsx`, `app/layout.tsx`, `app/globals.css`, `lib/format.ts` |
-| Data | shared | `data/synthetic_patients.csv`, `data/patient_schema.ts`, `data/trials/*.json` |
-| Shared types | announce changes | `lib/types.ts`, `lib/nct.ts` |
-
-## How we work
-
-- We push straight to `main`. Don't push code that breaks the app (`npm run build` and `npm test` must pass).
-- Split the work by file or area so we're rarely editing the same file.
-- Loop: `git pull --rebase` → code → commit → `git pull --rebase` → `git push`. Small commits, every 15–30 min.
-- Never commit `.env.local` or real patient data.
-
-## Demo
-
-_Link, screenshots, or GIF._
