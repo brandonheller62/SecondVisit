@@ -23,7 +23,7 @@ export function CostPanel({ result, assumptions, onAssumptions }: { result: Simu
             <table className="w-full min-w-[420px] text-left">
               <caption className="sr-only">Cost per support</caption>
               <thead className="text-sm text-muted">
-                <tr className="border-b border-line">
+                <tr className="border-b border-border">
                   <th scope="col" className="py-2 pr-3 font-medium">Support</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">Patients helped</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">Cost</th>
@@ -35,7 +35,7 @@ export function CostPanel({ result, assumptions, onAssumptions }: { result: Simu
                   <tr><td colSpan={4} className="py-3 text-muted">Turn on a support above to see its cost.</td></tr>
                 )}
                 {result.costs.map((c) => (
-                  <tr key={c.support} className="border-b border-line/60">
+                  <tr key={c.support} className="border-b border-border/60">
                     <th scope="row" className="py-2 pr-3 font-medium">{SUPPORT_LABELS[c.support].label}</th>
                     <td className="py-2 pr-3 text-right tabular-nums">{c.patientsHelped}</td>
                     <td className="py-2 pr-3 text-right tabular-nums">{fmtMoney(c.cost)}</td>
@@ -63,7 +63,7 @@ export function CostPanel({ result, assumptions, onAssumptions }: { result: Simu
             </div>
             <div className="rounded-lg bg-bg p-3">
               <dt className="text-sm text-muted">Difference<ScenarioBadge /></dt>
-              <dd className={`text-2xl font-bold tabular-nums ${net >= 0 ? "text-accent" : "text-warn"}`}>
+              <dd className={`text-2xl font-bold tabular-nums ${net >= 0 ? "text-primary" : "text-warn"}`}>
                 {net >= 0 ? "+" : "−"}
                 {fmtMoney(Math.abs(net))}
               </dd>

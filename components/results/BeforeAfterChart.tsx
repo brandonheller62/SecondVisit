@@ -44,7 +44,7 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
             {r.expectedCompletersBefore}
             <ArrowRight {...ico} className={`${ico.className} text-muted`} />
             <span className="sr-only">to</span>
-            <span className="text-accent">{r.expectedCompletersAfter}</span>
+            <span className="text-primary">{r.expectedCompletersAfter}</span>
           </div>
           <div className="text-sm text-muted">
             of {sim.before.patients.length} patients ({fmtPct(r.completionBefore)} without, {fmtPct(r.completionAfter)} with supports)
@@ -60,20 +60,20 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
         <div style={{ height: 320 }} aria-hidden>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 28, right: 8, left: 0, bottom: 0 }} barGap={6}>
-              <CartesianGrid stroke={c.line} vertical={false} />
-              <XAxis dataKey="name" tick={{ fill: c.ink, fontSize: 14 }} axisLine={{ stroke: c.line }} tickLine={false} interval={0} />
+              <CartesianGrid stroke={c.border} vertical={false} />
+              <XAxis dataKey="name" tick={{ fill: c.text, fontSize: 14 }} axisLine={{ stroke: c.border }} tickLine={false} interval={0} />
               <YAxis domain={[0, 100]} unit="%" tick={{ fill: c.muted, fontSize: 13 }} axisLine={false} tickLine={false} width={52} />
               <Tooltip
-                cursor={{ fill: "rgba(255,255,255,0.05)" }}
+                cursor={{ fill: c["surface-2"] }}
                 formatter={(v) => `${v}%`}
-                contentStyle={{ background: c["surface-2"], border: `1px solid ${c.line}`, borderRadius: 8, color: c.ink }}
+                contentStyle={{ background: c["surface-2"], border: `1px solid ${c.border}`, borderRadius: 8, color: c.text }}
               />
-              <Legend wrapperStyle={{ color: c.ink, fontSize: 15 }} />
+              <Legend wrapperStyle={{ color: c.text, fontSize: 15 }} />
               <Bar dataKey="before" name="Without supports" fill={c.baseline} radius={[4, 4, 0, 0]}>
-                <LabelList dataKey="before" position="top" fill={c.ink} fontSize={14} formatter={(v) => `${v}%`} />
+                <LabelList dataKey="before" position="top" fill={c.text} fontSize={14} formatter={(v) => `${v}%`} />
               </Bar>
-              <Bar dataKey="after" name={afterLabel} fill={c.accent} radius={[4, 4, 0, 0]}>
-                <LabelList dataKey="after" position="top" fill={c.ink} fontSize={14} formatter={(v) => `${v}%`} />
+              <Bar dataKey="after" name={afterLabel} fill={c.primary} radius={[4, 4, 0, 0]}>
+                <LabelList dataKey="after" position="top" fill={c.text} fontSize={14} formatter={(v) => `${v}%`} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

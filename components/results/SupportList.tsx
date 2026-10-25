@@ -21,8 +21,8 @@ function CostLines({ rows, total, fmt }: { rows: { label: string; amount: number
         </div>
       ))}
       <div className="contents font-semibold">
-        <dt className="mt-1 border-t border-line pt-1">{total.label}</dt>
-        <dd className="mt-1 border-t border-line pt-1 text-right tabular-nums">{fmt(total.amount)}</dd>
+        <dt className="mt-1 border-t border-border pt-1">{total.label}</dt>
+        <dd className="mt-1 border-t border-border pt-1 text-right tabular-nums">{fmt(total.amount)}</dd>
       </div>
     </dl>
   );
@@ -83,7 +83,7 @@ export function SupportList({ patients, visitCount, costUnknown }: { patients: P
         <table className="w-full min-w-[1040px] text-left">
           <caption className="sr-only">Patients ranked by need for support to stay in the trial</caption>
           <thead className="text-sm text-muted">
-            <tr className="border-b border-line">
+            <tr className="border-b border-border">
               <th scope="col" className="py-2 pr-3 font-medium">#</th>
               <th scope="col" className="py-2 pr-3 font-medium">Patient</th>
               <th scope="col" className="py-2 pr-3 font-medium">Support need<ScenarioBadge /></th>
@@ -94,7 +94,7 @@ export function SupportList({ patients, visitCount, costUnknown }: { patients: P
           </thead>
           <tbody>
             {rows.slice(0, shown).map((p) => (
-              <tr key={p.patientId} className="border-b border-line/60 align-top">
+              <tr key={p.patientId} className="border-b border-border/60 align-top">
                 <td className="py-3 pr-3 tabular-nums text-muted">{rank.get(p.patientId)}</td>
                 <td className="py-3 pr-3">
                   <div className="font-mono font-semibold">{p.patientId}</div>
@@ -130,7 +130,7 @@ export function SupportList({ patients, visitCount, costUnknown }: { patients: P
                   <div className="flex flex-wrap gap-1">
                     {p.recommendedSupports.length === 0 && <span className="text-muted">Standard reminders</span>}
                     {p.recommendedSupports.map((s) => (
-                      <Badge key={s} tone="accent">{SUPPORT_LABELS[s].label}</Badge>
+                      <Badge key={s} tone="primary">{SUPPORT_LABELS[s].label}</Badge>
                     ))}
                   </div>
                 </td>

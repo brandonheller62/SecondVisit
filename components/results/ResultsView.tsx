@@ -80,13 +80,13 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
 
       <LimitationsBox />
 
-      <details className="group rounded-xl border border-line bg-surface">
+      <details className="group rounded-xl border border-border bg-surface">
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-5 py-4 text-xl font-semibold [&::-webkit-details-marker]:hidden">
           <CaretRight {...ico} className={`${ico.className} transition-transform group-open:rotate-90`} />
           Advanced
           <span className="text-sm font-normal text-muted">Assumptions, costs, and how unknowns were handled</span>
         </summary>
-        <div className="space-y-6 border-t border-line p-5">
+        <div className="space-y-6 border-t border-border p-5">
           {sim.before.unknownNotes.length > 0 && (
             <Card title="How unknowns were handled">
               <ul className="list-disc space-y-1 pl-5">

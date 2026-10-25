@@ -41,7 +41,7 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
         <table className="w-full min-w-[520px] text-left">
           <caption className="sr-only">Completion by {LABEL[by].toLowerCase()}</caption>
           <thead className="text-sm text-muted">
-            <tr className="border-b border-line">
+            <tr className="border-b border-border">
               <th scope="col" className="py-2 pr-3 font-medium">{LABEL[by]}</th>
               <th scope="col" className="py-2 pr-3 font-medium">People</th>
               <th scope="col" className="py-2 pr-3 font-medium">Without supports<ScenarioBadge /></th>
@@ -51,7 +51,7 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
           </thead>
           <tbody>
             {g.rows.map((r) => (
-              <tr key={r.group} className="border-b border-line/60">
+              <tr key={r.group} className="border-b border-border/60">
                 <th scope="row" className="py-2 pr-3 font-medium">{r.group}</th>
                 {r.suppressed ? (
                   <td colSpan={4} className="py-2 italic text-muted">{TOO_SMALL}</td>
@@ -59,7 +59,7 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
                   <>
                     <td className="py-2 pr-3 tabular-nums">{r.n}</td>
                     <td className="py-2 pr-3 tabular-nums">{fmtPct(r.completionBefore!)}</td>
-                    <td className="py-2 pr-3 tabular-nums text-accent">{fmtPct(r.completionAfter!)}</td>
+                    <td className="py-2 pr-3 tabular-nums text-primary">{fmtPct(r.completionAfter!)}</td>
                     <td className="py-2 tabular-nums">{signedPts(r.completionAfter! - r.completionBefore!)}</td>
                   </>
                 )}

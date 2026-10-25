@@ -18,7 +18,7 @@ const TOOL_LABEL: Record<ToolName, string> = {
 };
 
 const statusUi: Record<RunStep["status"], { Icon: PhosphorIcon; spin?: boolean; word: string; ring: string; tone: "info" | "ok" | "bad" }> = {
-  running: { Icon: CircleNotch, spin: true, word: "Running", ring: "border-info text-info", tone: "info" },
+  running: { Icon: CircleNotch, spin: true, word: "Running", ring: "border-primary text-primary", tone: "info" },
   done: { Icon: Check, word: "Done", ring: "border-ok bg-ok/15 text-ok", tone: "ok" },
   error: { Icon: WarningCircle, word: "Error", ring: "border-bad bg-bad/15 text-bad", tone: "bad" },
 };
@@ -70,8 +70,8 @@ export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
             if (it.kind === "message") {
               return (
                 <li key={it.id} className="tm-enter relative flex gap-4 pb-5 last:pb-0">
-                  {!lastItem && <span aria-hidden className="absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-0.5 bg-line" />}
-                  <span aria-hidden className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-line text-muted"><ChatText {...ico} /></span>
+                  {!lastItem && <span aria-hidden className="absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-0.5 bg-border" />}
+                  <span aria-hidden className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-border text-muted"><ChatText {...ico} /></span>
                   <p className="pt-2 text-muted italic">{it.text}</p>
                 </li>
               );
@@ -80,7 +80,7 @@ export function AgentRunTimeline({ run, onCancel, onOpen, onPasteSchedule }: {
             const ui = statusUi[s.status];
             return (
               <li key={s.id} className="tm-enter relative flex gap-4 pb-6 last:pb-0" style={sameTurn ? { transitionDelay: `${sameTurn * 50}ms` } : undefined}>
-                {!lastItem && <span aria-hidden className={`absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-0.5 transition-colors duration-200 ${s.status === "done" ? "bg-ok/60" : "bg-line"}`} />}
+                {!lastItem && <span aria-hidden className={`absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-0.5 transition-colors duration-200 ${s.status === "done" ? "bg-ok/60" : "bg-border"}`} />}
                 <span aria-hidden className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-lg font-bold transition-colors duration-200 ${ui.ring}`}>
                   {/* Keyed by status so the new glyph mounts and pops in when the step finishes. */}
                   <span key={s.status} className="tm-pop flex">
