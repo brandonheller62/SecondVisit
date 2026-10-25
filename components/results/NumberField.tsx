@@ -38,7 +38,7 @@ export function NumberField({ label, value, onChange, step = 1, min = 0, max, pr
             const n = e.target.valueAsNumber;
             if (Number.isFinite(n)) onChange(Math.max(min, max === undefined ? n : Math.min(max, n)));
           }}
-          className="w-28 rounded-lg border border-border bg-bg px-3 py-2 tabular-nums"
+          className="w-28 rounded-md border border-border bg-bg px-3 py-2 tabular-nums"
           aria-describedby={hint ? `${id}-hint` : undefined}
         />
         {suffix && <span className="text-muted">{suffix}</span>}

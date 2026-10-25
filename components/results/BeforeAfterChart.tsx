@@ -25,12 +25,12 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
       if (!members.length) return null;
       const b = members.reduce((s, p) => s + p.pComplete, 0) / members.length;
       const a = members.reduce((s, p) => s + (after.get(p.patientId) ?? 0), 0) / members.length;
-      return { name: `${g.name} (${members.length})`, before: Math.round(b * 1000) / 10, after: Math.round(a * 1000) / 10 };
+      return { name: `${g.name} (${members.length})`, before: Math.round(b * 100), after: Math.round(a * 100) };
     })
     .filter((d): d is NonNullable<typeof d> => d !== null);
   const r = sim.result;
   const c = useThemeColors();
-  const afterLabel = r.supports.length ? "With selected supports" : "With supports (none selected)";
+  const afterLabel = "With support";
 
   return (
     <Card
@@ -60,20 +60,20 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
         <div style={{ height: 320 }} aria-hidden>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 28, right: 8, left: 0, bottom: 0 }} barGap={6}>
-              <CartesianGrid stroke={c.border} vertical={false} />
-              <XAxis dataKey="name" tick={{ fill: c.text, fontSize: 14 }} axisLine={{ stroke: c.border }} tickLine={false} interval={0} />
+              <CartesianGrid stroke={c["surface-2"]} vertical={false} />
+              <XAxis dataKey="name" tick={{ fill: c.muted, fontSize: 13 }} axisLine={{ stroke: c.border }} tickLine={false} interval={0} />
               <YAxis domain={[0, 100]} unit="%" tick={{ fill: c.muted, fontSize: 13 }} axisLine={false} tickLine={false} width={52} />
               <Tooltip
                 cursor={{ fill: c["surface-2"] }}
                 formatter={(v) => `${v}%`}
-                contentStyle={{ background: c["surface-2"], border: `1px solid ${c.border}`, borderRadius: 8, color: c.text }}
+                contentStyle={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: 6, color: c.text }}
               />
-              <Legend wrapperStyle={{ color: c.text, fontSize: 15 }} />
-              <Bar dataKey="before" name="Without supports" fill={c.baseline} radius={[4, 4, 0, 0]}>
-                <LabelList dataKey="before" position="top" fill={c.text} fontSize={14} formatter={(v) => `${v}%`} />
+              <Legend align="right" verticalAlign="top" iconType="square" iconSize={10} wrapperStyle={{ color: c.muted, fontSize: 12, paddingBottom: 8 }} />
+              <Bar dataKey="before" name="Without support" fill={c.baseline} radius={[2, 2, 0, 0]}>
+                <LabelList dataKey="before" position="top" fill={c.muted} fontSize={12} formatter={(v) => `${v}%`} />
               </Bar>
-              <Bar dataKey="after" name={afterLabel} fill={c.primary} radius={[4, 4, 0, 0]}>
-                <LabelList dataKey="after" position="top" fill={c.text} fontSize={14} formatter={(v) => `${v}%`} />
+              <Bar dataKey="after" name={afterLabel} fill={c.primary} radius={[2, 2, 0, 0]}>
+                <LabelList dataKey="after" position="top" fill={c.text} fontSize={12} formatter={(v) => `${v}%`} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -81,7 +81,7 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
         <table className="sr-only">
           <caption>Expected completion without and with supports</caption>
           <thead>
-            <tr><th>Group</th><th>Without supports</th><th>{afterLabel}</th></tr>
+            <tr><th>Group</th><th>Without support</th><th>{afterLabel}</th></tr>
           </thead>
           <tbody>
             {data.map((d) => (

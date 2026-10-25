@@ -2,9 +2,10 @@ import { Flask } from "@phosphor-icons/react/dist/ssr";
 import { useSyncExternalStore, type ReactNode } from "react";
 import { ico } from "./icons";
 
-// Radius rule: controls and inputs rounded-lg (8px), cards rounded-xl (12px), badges and switches pill.
+// Radius rule: controls and inputs rounded-md (6px), selectable options rounded-lg (8px), badges and switches pill.
+// Sections are separated by spacing and a thin top divider, never a box, so nothing nests card-in-card.
 
-const TOKENS = ["primary", "baseline", "text", "muted", "border", "surface-2"] as const;
+const TOKENS = ["primary", "baseline", "text", "muted", "border", "surface", "surface-2"] as const;
 type Token = (typeof TOKENS)[number];
 let tokenCache: Record<Token, string> | null = null;
 
@@ -34,11 +35,11 @@ export function Card({ title, subtitle, children, className = "", actions }: {
   actions?: ReactNode;
 }) {
   return (
-    <section className={`rounded-xl border border-border bg-surface p-5 ${className}`}>
+    <section className={`border-t border-border pt-6 ${className}`}>
       {(title || actions) && (
         <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
-            {title && <h2 className="text-xl font-semibold">{title}</h2>}
+            {title && <h2 className="text-xl font-semibold tracking-tight">{title}</h2>}
             {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
           </div>
           {actions}
@@ -51,8 +52,8 @@ export function Card({ title, subtitle, children, className = "", actions }: {
 
 const badgeTones = {
   neutral: "border-border text-muted",
-  primary: "border-primary/60 text-primary",
-  info: "border-primary/40 bg-primary/5 text-primary",
+  primary: "border-text/40 text-text",
+  info: "border-border text-muted",
   ok: "border-ok/60 text-ok",
   warn: "border-warn/60 text-warn",
   bad: "border-bad/60 text-bad",
@@ -93,7 +94,7 @@ export function AssumptionTag() {
   );
 }
 
-/** On/off switch with a visible state word, so state never relies on color. */
+/** On/off switch. State shows in the knob position and track fill, and aria-checked for screen readers. */
 export function Toggle({ checked, onChange, label, hint }: { checked: boolean; onChange: (v: boolean) => void; label: ReactNode; hint?: ReactNode }) {
   return (
     <button
@@ -101,18 +102,17 @@ export function Toggle({ checked, onChange, label, hint }: { checked: boolean; o
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition ${
-        checked ? "border-primary bg-primary/10" : "border-border bg-surface-2 hover:border-muted"
+      className={`flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left transition ${
+        checked ? "border-text/50" : "border-border hover:border-muted"
       }`}
     >
-      <span aria-hidden className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? "bg-primary" : "bg-border"}`}>
+      <span aria-hidden className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? "bg-text" : "bg-border"}`}>
         <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow-sm ring-1 ring-border transition-all ${checked ? "left-[22px]" : "left-0.5"}`} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block font-medium">{label}</span>
         {hint && <span className="block text-sm text-muted">{hint}</span>}
       </span>
-      <span className={`text-xs font-bold uppercase ${checked ? "text-primary" : "text-muted"}`}>{checked ? "On" : "Off"}</span>
     </button>
   );
 }
@@ -124,8 +124,8 @@ export function Chip({ pressed, onClick, children }: { pressed: boolean; onClick
       type="button"
       aria-pressed={pressed}
       onClick={onClick}
-      className={`min-h-11 rounded-lg px-3 text-sm font-medium transition active:scale-[0.98] ${
-        pressed ? "bg-primary text-on-primary hover:bg-primary-hover" : "border border-border bg-surface-2 hover:border-muted"
+      className={`min-h-11 rounded-md border px-3 text-sm font-medium transition active:scale-[0.98] ${
+        pressed ? "border-text bg-text text-surface" : "border-border hover:border-muted"
       }`}
     >
       {children}
@@ -139,11 +139,11 @@ export function Button({ children, variant = "secondary", className = "", ...pro
   const styles =
     variant === "primary"
       ? "bg-primary text-on-primary enabled:hover:bg-primary-hover enabled:active:bg-primary-hover"
-      : "border border-border bg-surface-2 text-text hover:border-muted";
+      : "border border-border bg-surface text-text hover:border-muted";
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold transition enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold transition enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
       {...props}
     >
       {children}

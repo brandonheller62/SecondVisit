@@ -20,7 +20,7 @@ export function TopNav({ tab, onTab, enabled, subtitle }: {
       <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-1.5 sm:gap-6 sm:py-2">
         <div className="flex shrink-0 items-baseline gap-3 lg:min-w-0 lg:flex-1 lg:shrink">
           <span className="shrink-0 whitespace-nowrap text-lg font-bold tracking-tight sm:text-2xl">
-            Trial <span className="text-primary">Mirror</span>
+            Trial Mirror
           </span>
           {subtitle && (
             <span className="hidden min-w-0 truncate text-sm text-muted lg:block" title={subtitle}>
@@ -38,8 +38,8 @@ export function TopNav({ tab, onTab, enabled, subtitle }: {
                   disabled={!enabled[t.id]}
                   aria-current={active ? "page" : undefined}
                   onClick={() => onTab(t.id)}
-                  className={`min-h-11 min-w-11 whitespace-nowrap rounded-lg px-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40 sm:px-3 sm:text-base ${
-                    active ? "bg-primary text-on-primary" : "text-text hover:bg-surface-2"
+                  className={`min-h-11 min-w-11 whitespace-nowrap rounded-md px-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40 sm:px-3 sm:text-base ${
+                    active ? "bg-surface-2 font-semibold text-text" : "text-muted hover:bg-surface-2 hover:text-text"
                   }`}
                 >
                   <span className="sm:hidden">{t.short}</span>

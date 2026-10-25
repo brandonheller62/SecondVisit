@@ -60,7 +60,7 @@ export function StartPanel({ nctId, onNctId, file, onSample, onUpload, protocolT
             onChange={(e) => onNctId(e.target.value)}
             placeholder="NCT00000000"
             spellCheck={false}
-            className="mt-1 w-full rounded-lg border border-border bg-bg px-3 py-3 font-mono text-xl uppercase tracking-wide"
+            className="mt-1 w-full rounded-md border border-border bg-bg px-3 py-3 font-mono text-xl uppercase tracking-wide"
             aria-invalid={nctId !== "" && !nctValid}
             aria-describedby="nct-help"
           />
@@ -149,7 +149,7 @@ export function StartPanel({ nctId, onNctId, file, onSample, onUpload, protocolT
             onChange={(e) => onProtocolText(e.target.value)}
             rows={8}
             placeholder={"e.g. Screening (week -2): fasting labs, 2 hours, 8 AM.\nWeek 0 baseline: ECG, questionnaires, 3 hours…"}
-            className="w-full rounded-lg border border-border bg-bg px-3 py-2 font-mono text-sm"
+            className="w-full rounded-md border border-border bg-bg px-3 py-2 font-mono text-sm"
           />
         </Card>
       )}

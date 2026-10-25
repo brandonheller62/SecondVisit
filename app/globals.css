@@ -2,7 +2,7 @@
 
 /* `static` emits every token as a CSS variable so charts can read them too. */
 @theme static {
-  /* White and deep blue. Every color in the app comes from these tokens. */
+  /* White, neutral grays and one deep blue accent. Every color in the app comes from these tokens. */
   --color-bg: #ffffff;
   --color-surface: #ffffff;
   --color-surface-2: #f4f7fb;
@@ -17,11 +17,11 @@
   --color-warn: #92400e;
   --color-bad: #b91c1c;
   /* "Without supports" bars in charts: 3:1 against white for graphical objects. */
-  --color-baseline: #7a8ca6;
+  --color-baseline: #8a8f98;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
 }
 
 html {
@@ -32,19 +32,14 @@ html {
 body {
   background: var(--color-bg);
   color: var(--color-text);
+  font-variant-numeric: tabular-nums;
 }
 
-/* In the base layer so a text-* utility on a heading still wins. */
-@layer base {
-  h1,
-  h2,
-  h3 {
-    color: var(--color-primary);
-  }
-}
+/* One accent only: blue is for the primary button and the "with support" bars.
+   Headings and everything else stay neutral. */
 
 :focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: 3px solid var(--color-text);
   outline-offset: 2px;
   border-radius: 4px;
 }
