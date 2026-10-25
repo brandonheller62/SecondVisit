@@ -6,16 +6,14 @@ import type { SimulationResult } from "@/lib/types";
 import { Card } from "@/components/shell/ui";
 import { NumberField } from "./NumberField";
 
-/** Support cost vs the cost of losing participants. */
+/** What the selected supports cost, offered to everyone whose barriers call for them. */
 export function CostPanel({ result, assumptions, onAssumptions }: { result: SimulationResult; assumptions: Assumptions; onAssumptions: (a: Assumptions) => void }) {
   const sc = assumptions.supportCosts;
   const setCost = (k: keyof Assumptions["supportCosts"], v: number) => onAssumptions({ ...assumptions, supportCosts: { ...sc, [k]: v } });
-  const avoided = Math.max(0, result.expectedCompletersAfter - result.expectedCompletersBefore);
-  const lossAvoided = avoided * assumptions.replacementCostPerParticipant;
-  const net = lossAvoided - result.totalSupportCost;
+  const helped = result.tiersBefore.High - result.tiersAfter.High;
 
   return (
-    <Card title="Cost" subtitle="Supports for everyone who needs them, compared with replacing people who leave.">
+    <Card title="Cost" subtitle="Supports for everyone whose barriers call for them.">
       <div className="grid gap-6 lg:grid-cols-2">
         <div>
           <div className="overflow-x-auto">
@@ -51,25 +49,13 @@ export function CostPanel({ result, assumptions, onAssumptions }: { result: Simu
               <dd className="text-2xl font-semibold">{fmtMoney(result.totalSupportCost)}</dd>
             </div>
             <div>
-              <dt className="text-sm text-muted">Dropouts avoided</dt>
-              <dd className="text-2xl font-semibold">about {Math.round(avoided)}</dd>
-            </div>
-            <div>
-              <dt className="text-sm text-muted">Replacement cost avoided</dt>
-              <dd className="text-2xl font-semibold">{fmtMoney(lossAvoided)}</dd>
-            </div>
-            <div>
-              <dt className="text-sm text-muted">Difference</dt>
-              <dd className="text-2xl font-semibold">
-                {net >= 0 ? "+" : "−"}
-                {fmtMoney(Math.abs(net))}
-              </dd>
+              <dt className="text-sm text-muted">Patients moved out of high need</dt>
+              <dd className="text-2xl font-semibold">{helped}</dd>
             </div>
           </dl>
         </div>
 
         <div className="grid grid-cols-2 content-start gap-4">
-          <NumberField label="Replacement cost per participant" prefix="$" step={500} value={assumptions.replacementCostPerParticipant} onChange={(v) => onAssumptions({ ...assumptions, replacementCostPerParticipant: v })} hint="Use your site's own figure." />
           <NumberField label="Ride voucher per visit" prefix="$" value={sc.rideVoucherPerVisit} onChange={(v) => setCost("rideVoucherPerVisit", v)} />
           <NumberField label="Evening slot per visit" prefix="$" value={sc.eveningVisitPerVisit} onChange={(v) => setCost("eveningVisitPerVisit", v)} hint="Extra staff time per patient visit." />
           <NumberField label="Childcare per visit" prefix="$" value={sc.childcarePerVisit} onChange={(v) => setCost("childcarePerVisit", v)} />

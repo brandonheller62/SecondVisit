@@ -3,7 +3,7 @@
 import { CaretRight } from "@phosphor-icons/react/dist/ssr";
 import { Fragment, useState } from "react";
 import { BARRIER_LABELS, SUPPORT_LABELS } from "@/lib/assumptions";
-import { fmtCents, fmtMoney, fmtPct } from "@/lib/format";
+import { fmtCents, fmtMoney } from "@/lib/format";
 import type { PatientBarrier, PatientScore, SupportKey, Tier } from "@/lib/types";
 import { ico } from "@/components/shell/icons";
 import { Card, Chip } from "@/components/shell/ui";
@@ -56,6 +56,7 @@ function BarrierLine({ b, visit, full }: { b: PatientBarrier; visit: string | nu
       <span className="font-medium">{BARRIER_LABELS[b.key].label}</span>
       {b.visitLabel !== visit && <span className="text-muted"> at {b.visitLabel}</span>}
       <span className="text-muted">: {full ? b.reason : shortReason(b.reason)}</span>
+      {full && <span className="text-muted"> (+{b.points})</span>}
     </>
   );
 }
@@ -72,7 +73,7 @@ function Details({ p, visit, visits }: { p: PatientScore; visit: string | null; 
   return (
     <div className="grid gap-6 py-3 pl-8 md:grid-cols-3">
       <div>
-        <h3 className="text-sm font-medium text-muted">All barriers</h3>
+        <h3 className="text-sm font-medium text-muted">Barriers and points ({p.points} of {p.maxPoints})</h3>
         <ul className="mt-1 space-y-1">
           {p.topBarriers.length === 0 && <li className="text-muted">None found</li>}
           {p.topBarriers.map((b) => (
@@ -159,7 +160,7 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
           <thead className="text-sm text-muted">
             <tr className="border-b border-border">
               <th scope="col" className="py-2 pr-3 font-medium">Rank and patient</th>
-              <th scope="col" className="py-2 pr-3 font-medium">Need · risk of dropping out</th>
+              <th scope="col" className="py-2 pr-3 font-medium">Need · score</th>
               <th scope="col" className="py-2 pr-3 font-medium">Main barriers</th>
               <th scope="col" className="py-2 text-right font-medium">Cost per visit</th>
             </tr>
@@ -193,7 +194,7 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
                         <span aria-hidden className={`h-2 w-2 rounded-full ${tierDot[p.tier]}`} />
                         {p.tier}
                       </span>
-                      <span className="ml-3 text-muted">{fmtPct(p.risk)}</span>
+                      <span className="ml-3 text-muted">{p.points} of {p.maxPoints}</span>
                     </td>
                     <td className="py-2.5 pr-3">
                       {p.topBarriers.length === 0 ? (

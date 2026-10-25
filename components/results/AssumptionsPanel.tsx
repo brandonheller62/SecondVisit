@@ -12,7 +12,7 @@ const LANGUAGE_OPTIONS = ["English", "Spanish", "Haitian Creole", "Portuguese"];
 const WEIGHT_NOTES: Record<BarrierKey, string> = {
   scheduleClash: "Morning/fasting visit after a night or irregular shift; daytime visit with no time off; visits over 3 hours",
   transport: "Bus/Metrorail only and over 40 minutes each way",
-  cost: "Travel, lost pay and uninsured costs vs a household's spare budget",
+  cost: "Travel, lost pay and uninsured costs of at least half a household's spare budget per visit",
   childcare: "Children under 6 and no childcare",
   languageAccess: "Trial materials not in the person's language (a gap in the trial)",
   missedPrior: "Past missed appointments. Off by default: can encode socioeconomic bias",
@@ -38,8 +38,8 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
         </div>
       }
     >
-      <h3 className="text-lg font-semibold">Barrier weights (per visit)</h3>
-      <p className="text-sm text-muted">How hard a visit is = 1 − product of (1 − weight × exposure). It adds up across visits.</p>
+      <h3 className="text-lg font-semibold">Points per barrier</h3>
+      <p className="text-sm text-muted">Need score = the points of every barrier a patient has, counted once however many visits it affects.</p>
       <div className="mt-3 grid gap-x-8 gap-y-5 md:grid-cols-2">
         {BARRIER_KEYS.map((k) => (
           <div key={k}>
@@ -48,17 +48,17 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
                 <BarrierIcon barrier={k} className="mr-1.5 text-muted" />
                 {BARRIER_LABELS[k].label}
               </span>
-              <span className="tabular-nums">{a.weights[k].toFixed(2)}</span>
+              <span className="tabular-nums">{a.points[k]}</span>
             </label>
             <input
               id={`w-${k}`}
               type="range"
               min={0}
-              max={0.5}
-              step={0.01}
-              value={a.weights[k]}
+              max={5}
+              step={1}
+              value={a.points[k]}
               disabled={k === "missedPrior" && !a.missedPriorEnabled}
-              onChange={(e) => set({ weights: { ...a.weights, [k]: Number(e.target.value) } })}
+              onChange={(e) => set({ points: { ...a.points, [k]: Number(e.target.value) } })}
               className="mt-2 w-full disabled:opacity-40"
             />
             <p className="mt-1 text-xs text-muted">{WEIGHT_NOTES[k]}</p>
@@ -75,8 +75,8 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
         <div>
           <h3 className="text-lg font-semibold">Support need levels</h3>
           <div className="mt-2 grid gap-3">
-            <NumberField label="High when chance of needing help to stay ≥" step={0.05} max={1} value={a.tiers.high} onChange={(v) => set({ tiers: { ...a.tiers, high: Math.max(v, a.tiers.medium) } })} />
-            <NumberField label="Medium when chance of needing help to stay ≥" step={0.05} max={1} value={a.tiers.medium} onChange={(v) => set({ tiers: { ...a.tiers, medium: Math.min(v, a.tiers.high) } })} />
+            <NumberField label="High at this many points or more" step={1} max={20} value={a.tiers.high} onChange={(v) => set({ tiers: { ...a.tiers, high: Math.max(v, a.tiers.medium) } })} />
+            <NumberField label="Medium at this many points or more" step={1} max={20} value={a.tiers.medium} onChange={(v) => set({ tiers: { ...a.tiers, medium: Math.min(v, a.tiers.high) } })} />
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { fmtPct, TOO_SMALL } from "@/lib/format";
+import { TOO_SMALL } from "@/lib/format";
 import { MIN_GROUP_SIZE } from "@/lib/scoring/simulate";
 import type { GroupBy, GroupSummary } from "@/lib/types";
 import { GROUP_BYS } from "@/lib/types";
@@ -15,8 +15,8 @@ const LABEL: Record<GroupBy, string> = {
 };
 
 function signedPts(delta: number) {
-  const pts = Math.round(delta * 100);
-  return `${pts > 0 ? "+" : pts < 0 ? "−" : "±"}${Math.abs(pts)} pts`;
+  const pts = Math.round(delta * 10) / 10;
+  return `${pts > 0 ? "+" : pts < 0 ? "−" : "±"}${Math.abs(pts).toFixed(1)}`;
 }
 
 /** Group reporting only. Neighborhood and language never feed the score. */
@@ -26,7 +26,7 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
   return (
     <Card
       title="By group"
-      subtitle={`Groups under ${MIN_GROUP_SIZE} people are hidden.`}
+      subtitle={`Average need score (points). Groups under ${MIN_GROUP_SIZE} people are hidden.`}
       actions={
         <div role="group" aria-label="Group by" className="flex flex-wrap gap-1">
           {GROUP_BYS.map((k) => (
@@ -58,9 +58,9 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
                 ) : (
                   <>
                     <td className="py-2 pr-3 tabular-nums">{r.n}</td>
-                    <td className="py-2 pr-3 tabular-nums">{fmtPct(r.completionBefore!)}</td>
-                    <td className="py-2 pr-3 tabular-nums font-semibold">{fmtPct(r.completionAfter!)}</td>
-                    <td className="py-2 tabular-nums">{signedPts(r.completionAfter! - r.completionBefore!)}</td>
+                    <td className="py-2 pr-3 tabular-nums">{r.averagePointsBefore!.toFixed(1)}</td>
+                    <td className="py-2 pr-3 tabular-nums font-semibold">{r.averagePointsAfter!.toFixed(1)}</td>
+                    <td className="py-2 tabular-nums">{signedPts(r.averagePointsAfter! - r.averagePointsBefore!)}</td>
                   </>
                 )}
               </tr>
