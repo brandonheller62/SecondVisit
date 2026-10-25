@@ -24,9 +24,10 @@ _Decided at the event._
 
 ## How we work
 
-- `main` should always run. Build on a branch (`git switch -c feature-name`), then merge.
-- Pull before you start: `git pull --rebase`.
-- Commit small and often, and push so your teammate can see it.
+- We both push straight to `main`. Don't push code that breaks the app.
+- Split the work by file or area so we're rarely editing the same file.
+- Loop: `git pull --rebase` → code → commit → `git pull --rebase` → `git push`. Small commits, every 15–30 min.
+- Pull rejected or conflict? Fix the marked lines, `git add <file>`, `git rebase --continue`, push. Never `--force`.
 - Secrets go in `.env` (gitignored). Never commit API keys; share them directly.
 
 ## Demo
