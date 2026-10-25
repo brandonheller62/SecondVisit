@@ -12,7 +12,7 @@ export const fmtCount = (n: number) => (isReportable(n) ? n.toLocaleString("en-U
 export const fmtPct = (x: number, digits = 0) => `${(x * 100).toFixed(digits)}%`;
 
 export const fmtMoney = (n: number) =>
-  n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: n < 10 ? 2 : 0 });
 
 export type FrictionLevel = "low" | "medium" | "barrier";
 

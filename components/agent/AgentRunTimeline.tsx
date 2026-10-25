@@ -48,13 +48,16 @@ export function AgentRunTimeline({ trial, runKey, onOpen }: {
             {trial.id} · {trial.shortTitle}
           </p>
         </div>
+        <p className="sr-only" aria-live="polite">
+          {steps[revealed].label}: {finished ? "waiting for CHW approval" : "running"}
+        </p>
         {!finished && (
           <Button onClick={() => setRevealed(steps.length - 1)}>Skip to end</Button>
         )}
       </div>
 
       <Card>
-        <ol className="relative" aria-live="polite">
+        <ol className="relative">
           {steps.map((step, i) => {
             const status: AgentStepStatus | "waiting" =
               i < revealed ? "done" : i === revealed ? (i === steps.length - 1 ? "waiting" : "running") : "pending";

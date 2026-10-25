@@ -3,7 +3,7 @@ import type { ToolCall } from "@/lib/types";
 export function ToolCallPanel({ call }: { call: ToolCall }) {
   return (
     <details className="group mt-3 rounded-lg border border-line bg-bg">
-      <summary className="cursor-pointer select-none px-3 py-2 text-sm font-medium text-info">
+      <summary className="cursor-pointer list-none select-none px-3 py-2 [&::-webkit-details-marker]:hidden text-sm font-medium text-info">
         <span className="inline-block transition group-open:rotate-90" aria-hidden>▸</span> Tool call:{" "}
         <code className="font-mono">{call.tool}</code>
       </summary>

@@ -3,7 +3,7 @@ import type { Scenario } from "@/lib/types";
 const toggles: { key: keyof Scenario; label: string; icon: string; help: string; tone: "accent" | "warn" }[] = [
   { key: "eveningVisits", label: "Evening visits", icon: "☾", help: "Offer a 5:30 PM option for morning visits", tone: "accent" },
   { key: "rideVouchers", label: "Ride vouchers", icon: "⛟", help: "Rides paid up front", tone: "accent" },
-  { key: "stormWeek", label: "Storm closure week", icon: "☈", help: "Hurricane closes the clinic for a week", tone: "warn" },
+  { key: "stormWeek", label: "Storm closure week", icon: "⛈", help: "Hurricane closes the clinic for a week", tone: "warn" },
 ];
 
 export function ScenarioToggles({ scenario, onChange }: { scenario: Scenario; onChange: (s: Scenario) => void }) {

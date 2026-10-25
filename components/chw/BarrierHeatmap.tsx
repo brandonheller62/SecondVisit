@@ -34,7 +34,7 @@ export function BarrierHeatmap({ trial, personas, barriers, threshold }: {
                   <span className="block text-xs font-normal text-muted">
                     {v.startTime}
                     {v.fasting && " · fast"}
-                    {v.id === trial.stormVisitId && " · ☈"}
+                    {v.id === trial.stormVisitId && " · ⛈"}
                   </span>
                 </th>
               ))}

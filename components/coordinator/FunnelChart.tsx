@@ -14,16 +14,21 @@ export function FunnelChart({ before, after, afterLabel, height = 340 }: {
   afterLabel: string;
   height?: number;
 }) {
-  const data = before.stages.map((s, i) => ({
+  // Population is shown as text; as a bar it would dwarf every other stage.
+  const population = before.stages[0];
+  const data = before.stages.slice(1).map((s, i) => ({
     stage: s.label,
     before: isReportable(s.count) ? s.count : 0,
-    after: isReportable(after.stages[i].count) ? after.stages[i].count : 0,
+    after: isReportable(after.stages[i + 1].count) ? after.stages[i + 1].count : 0,
     beforeLabel: fmtCount(s.count),
-    afterLabel: fmtCount(after.stages[i].count),
+    afterLabel: fmtCount(after.stages[i + 1].count),
   }));
 
   return (
     <figure>
+      <figcaption className="mb-2 text-muted">
+        Starting from <b className="text-ink">{fmtCount(population.count)}</b> {population.label.toLowerCase()}
+      </figcaption>
       <div style={{ height }} aria-hidden>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 28, right: 8, left: 8, bottom: 0 }} barGap={6}>
@@ -46,7 +51,7 @@ export function FunnelChart({ before, after, afterLabel, height = 340 }: {
       </div>
       {/* Screen-reader version of the same numbers. */}
       <table className="sr-only">
-        <caption>Funnel before and after accommodations</caption>
+        <caption>Funnel before and after accommodations, from {fmtCount(population.count)} synthetic adults</caption>
         <thead>
           <tr><th>Stage</th><th>Before</th><th>{afterLabel}</th></tr>
         </thead>
