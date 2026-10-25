@@ -3,6 +3,7 @@
 import { BARRIER_LABELS, DEFAULT_ASSUMPTIONS, cloneAssumptions, type Assumptions } from "@/lib/assumptions";
 import type { BarrierKey, MaybeUnknown } from "@/lib/types";
 import { BARRIER_KEYS, isKnown } from "@/lib/types";
+import { BarrierIcon } from "@/components/shell/icons";
 import { Badge, Button, Card, Toggle } from "@/components/shell/ui";
 import { NumberField } from "./NumberField";
 
@@ -44,7 +45,7 @@ export function AssumptionsPanel({ assumptions, onAssumptions, materialsFromTria
           <div key={k} className="rounded-lg bg-bg p-3">
             <label htmlFor={`w-${k}`} className="flex items-center justify-between gap-2 font-medium">
               <span>
-                <span aria-hidden>{BARRIER_LABELS[k].icon} </span>
+                <BarrierIcon barrier={k} className="mr-1.5 text-muted" />
                 {BARRIER_LABELS[k].label}
               </span>
               <span className="tabular-nums">{a.weights[k].toFixed(2)}</span>

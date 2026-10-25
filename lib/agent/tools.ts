@@ -220,7 +220,7 @@ export async function runTool(name: ToolName, rawInput: unknown, ctx: RunContext
       ctx.sim = sim;
       const r = sim.result;
       return {
-        summary: `${supports.map((s) => SUPPORT_LABELS[s].label).join(", ") || "No supports"}: completion ${pct(r.completionBefore)} → ${pct(r.completionAfter)} for about $${r.totalSupportCost.toLocaleString("en-US")}`,
+        summary: `${supports.map((s) => SUPPORT_LABELS[s].label).join(", ") || "No supports"}: completion ${pct(r.completionBefore)} without, ${pct(r.completionAfter)} with, for about $${r.totalSupportCost.toLocaleString("en-US")}`,
         forModel: { ...r, note: "Scenario estimate from unvalidated assumptions, not a prediction." },
       };
     }

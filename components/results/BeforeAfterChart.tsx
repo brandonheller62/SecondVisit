@@ -5,6 +5,8 @@ import { SUPPORT_LABELS } from "@/lib/assumptions";
 import { fmtPct } from "@/lib/format";
 import type { SimulationRun } from "@/lib/scoring/simulate";
 import type { Tier } from "@/lib/types";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { ico } from "@/components/shell/icons";
 import { Card, useThemeColors } from "@/components/shell/ui";
 
 
@@ -38,10 +40,15 @@ export function BeforeAfterChart({ sim, children }: { sim: SimulationRun; childr
       <div className="mb-4 flex flex-wrap gap-6">
         <div>
           <div className="text-sm text-muted">Expected to finish</div>
-          <div className="text-3xl font-bold tabular-nums">
-            {r.expectedCompletersBefore} <span className="text-muted">→</span> <span className="text-accent">{r.expectedCompletersAfter}</span>
+          <div className="flex items-center gap-2 text-3xl font-bold tabular-nums">
+            {r.expectedCompletersBefore}
+            <ArrowRight {...ico} className={`${ico.className} text-muted`} />
+            <span className="sr-only">to</span>
+            <span className="text-accent">{r.expectedCompletersAfter}</span>
           </div>
-          <div className="text-sm text-muted">of {sim.before.patients.length} patients ({fmtPct(r.completionBefore)} → {fmtPct(r.completionAfter)})</div>
+          <div className="text-sm text-muted">
+            of {sim.before.patients.length} patients ({fmtPct(r.completionBefore)} without, {fmtPct(r.completionAfter)} with supports)
+          </div>
         </div>
         <div>
           <div className="text-sm text-muted">Supports on</div>

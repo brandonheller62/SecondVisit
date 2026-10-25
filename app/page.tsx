@@ -77,7 +77,7 @@ export default function Home() {
         Skip to content
       </a>
       <div className="sticky top-0 z-30">
-        <TopNav tab={tab} onTab={setTab} enabled={enabled} subtitle={run.trial ? `${run.trial.nctId} · ${run.trial.title}` : undefined} />
+        <TopNav tab={tab} onTab={setTab} enabled={enabled} subtitle={run.trial ? `${run.trial.nctId}: ${run.trial.title}` : undefined} />
       </div>
       <main id="main" className="mx-auto max-w-7xl px-4 py-8">
         {tab === "start" && (

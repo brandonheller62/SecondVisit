@@ -1,8 +1,11 @@
 "use client";
 
+import { ArrowRight, Check, CircleNotch, UploadSimple, X } from "@phosphor-icons/react/dist/ssr";
+
 import { useRef } from "react";
 import type { ParseResult } from "@/lib/types";
-import { Badge, Button, Card } from "@/components/shell/ui";
+import { ico } from "@/components/shell/icons";
+import { Badge, Button, Card, SyntheticTag } from "@/components/shell/ui";
 
 export const DEMO_TRIALS = [
   {
@@ -77,8 +80,8 @@ export function StartPanel({ nctId, onNctId, file, onSample, onUpload, protocolT
                 >
                   <span className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-sm text-muted">{t.nctId}</span>
-                    <Badge tone="neutral">Demo · cached</Badge>
-                    {active && <Badge tone="accent">✓ Selected</Badge>}
+                    <Badge tone="neutral">Cached demo</Badge>
+                    {active && <Badge tone="accent"><Check {...ico} /> Selected</Badge>}
                   </span>
                   <span className="mt-1 block font-semibold">{t.label}</span>
                   <span className="block text-sm text-muted">{t.detail}</span>
@@ -91,7 +94,7 @@ export function StartPanel({ nctId, onNctId, file, onSample, onUpload, protocolT
         <Card title="2. Patients" subtitle="De-identified CSV of people already medically eligible. Processed in memory only.">
           <div className="flex flex-wrap gap-3">
             <Button variant="primary" onClick={onSample}>Use sample patients</Button>
-            <Button onClick={() => fileInput.current?.click()}>Upload CSV…</Button>
+            <Button onClick={() => fileInput.current?.click()}><UploadSimple {...ico} /> Upload CSV…</Button>
             <input
               ref={fileInput}
               type="file"
@@ -112,8 +115,8 @@ export function StartPanel({ nctId, onNctId, file, onSample, onUpload, protocolT
             {file && file.parse.ok && (
               <div className="space-y-1">
                 <p className="flex flex-wrap items-center gap-2 font-semibold">
-                  <span className="text-ok">✓</span> {file.name}
-                  <Badge tone="info">◆ Synthetic</Badge>
+                  <Check {...ico} className={`${ico.className} text-ok`} /> {file.name}
+                  <SyntheticTag />
                 </p>
                 <p>
                   {file.parse.quality.accepted} of {file.parse.quality.rows} rows accepted
@@ -126,7 +129,7 @@ export function StartPanel({ nctId, onNctId, file, onSample, onUpload, protocolT
             )}
             {file && !file.parse.ok && (
               <div role="alert" className="text-bad">
-                <p className="font-semibold">✕ {file.name} was not accepted</p>
+                <p className="flex items-center gap-2 font-semibold"><X {...ico} /> {file.name} was not accepted</p>
                 <p className="mt-1">{file.parse.error}</p>
               </div>
             )}
@@ -153,7 +156,7 @@ export function StartPanel({ nctId, onNctId, file, onSample, onUpload, protocolT
 
       <div className="flex flex-wrap items-center gap-4">
         <Button variant="primary" className="px-6 py-3 text-lg" disabled={!ready} onClick={onRun}>
-          {running ? "Agent running…" : "Run agent →"}
+          {running ? <><CircleNotch {...ico} className={`${ico.className} animate-spin`} /> Agent running…</> : <>Run agent <ArrowRight {...ico} /></>}
         </Button>
         {!ready && !running && <span className="text-muted">{!nctValid ? "Enter a valid NCT ID." : !file?.parse.ok ? "Add an accepted patient file." : ""}</span>}
       </div>

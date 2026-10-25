@@ -1,11 +1,13 @@
+import { CaretRight } from "@phosphor-icons/react/dist/ssr";
 import type { ToolName } from "@/lib/types";
+import { ico } from "@/components/shell/icons";
 
 /** Expandable view of exactly what went into and came out of a tool call. */
 export function ToolCallPanel({ tool, input, output }: { tool: ToolName; input: unknown; output: unknown }) {
   return (
     <details className="group mt-3 rounded-lg border border-line bg-bg">
       <summary className="cursor-pointer list-none select-none px-3 py-2 [&::-webkit-details-marker]:hidden text-sm font-medium text-info">
-        <span className="inline-block transition group-open:rotate-90" aria-hidden>▸</span> Tool input / output:{" "}
+        <span className="inline-flex transition-transform duration-150 group-open:rotate-90"><CaretRight {...ico} /></span> Tool input / output:{" "}
         <code className="font-mono">{tool}</code>
       </summary>
       <div className="grid gap-3 border-t border-line p-3 lg:grid-cols-2">

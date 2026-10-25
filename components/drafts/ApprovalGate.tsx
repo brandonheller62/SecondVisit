@@ -1,7 +1,10 @@
 "use client";
 
+import { Check, Hourglass } from "@phosphor-icons/react/dist/ssr";
+
 import { useEffect, useState } from "react";
 import type { Approval } from "@/lib/types";
+import { ico } from "@/components/shell/icons";
 import { Badge, Button } from "@/components/shell/ui";
 
 /**
@@ -25,7 +28,7 @@ export function ApprovalGate({ approval, onApprove, children }: {
     <div className="rounded-xl border border-line bg-surface p-5">
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-xl font-semibold">Approval</h2>
-        {approval ? <Badge tone="ok">✓ Approved</Badge> : <Badge tone="warn">⏳ Pending review</Badge>}
+        {approval ? <Badge tone="ok"><Check {...ico} /> Approved</Badge> : <Badge tone="warn"><Hourglass {...ico} /> Pending review</Badge>}
         {approval && (
           <span>
             by <b>{approval.reviewer}</b> on {new Date(approval.approvedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}

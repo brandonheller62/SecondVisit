@@ -1,4 +1,8 @@
+import { Flask } from "@phosphor-icons/react/dist/ssr";
 import { useSyncExternalStore, type ReactNode } from "react";
+import { ico } from "./icons";
+
+// Radius rule: controls and inputs rounded-lg (8px), cards rounded-xl (12px), badges and switches pill.
 
 const TOKENS = ["accent", "baseline", "ink", "muted", "line", "surface-2"] as const;
 type Token = (typeof TOKENS)[number];
@@ -66,7 +70,7 @@ export function Badge({ children, tone = "neutral" }: { children: ReactNode; ton
 export function SyntheticTag() {
   return (
     <Badge tone="info">
-      <span aria-hidden>◆</span> Synthetic
+      <Flask {...ico} /> Synthetic
     </Badge>
   );
 }
@@ -102,7 +106,7 @@ export function Chip({ pressed, onClick, children }: { pressed: boolean; onClick
       type="button"
       aria-pressed={pressed}
       onClick={onClick}
-      className={`min-h-11 rounded-lg px-3 text-sm font-medium transition ${
+      className={`min-h-11 rounded-lg px-3 text-sm font-medium transition active:scale-[0.98] ${
         pressed ? "bg-accent text-accent-ink" : "border border-line bg-surface-2 hover:border-muted"
       }`}
     >
@@ -121,7 +125,7 @@ export function Button({ children, variant = "secondary", className = "", ...pro
   return (
     <button
       type="button"
-      className={`rounded-lg px-4 py-2 font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold transition enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
       {...props}
     >
       {children}

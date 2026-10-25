@@ -110,13 +110,13 @@ export const DEFAULT_ASSUMPTIONS: Assumptions = {
   replacementCostPerParticipant: 20000,
 };
 
-export const BARRIER_LABELS: Record<BarrierKey, { label: string; icon: string }> = {
-  scheduleClash: { label: "Schedule clash", icon: "⏰" },
-  transport: { label: "Transport", icon: "🚌" },
-  cost: { label: "Cost", icon: "$" },
-  childcare: { label: "Childcare", icon: "👶" },
-  languageAccess: { label: "Language access gap", icon: "文" },
-  missedPrior: { label: "Missed appointments", icon: "↺" },
+export const BARRIER_LABELS: Record<BarrierKey, { label: string }> = {
+  scheduleClash: { label: "Schedule clash" },
+  transport: { label: "Transport" },
+  cost: { label: "Cost" },
+  childcare: { label: "Childcare" },
+  languageAccess: { label: "Language access gap" },
+  missedPrior: { label: "Missed appointments" },
 };
 
 export const SUPPORT_LABELS: Record<SupportKey, { label: string; fixes: BarrierKey[] }> = {
