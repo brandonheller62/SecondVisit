@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* `static` emits every token as a CSS variable so charts can read them too. */
+/* `static` emits every token as a CSS variable. */
 @theme static {
   /* White, neutral grays and one deep blue accent. Every color in the app comes from these tokens. */
   --color-bg: #ffffff;
@@ -16,8 +16,10 @@
   --color-ok: #166534;
   --color-warn: #92400e;
   --color-bad: #b91c1c;
-  /* "Without supports" bars in charts: 3:1 against white for graphical objects. */
-  --color-baseline: #8a8f98;
+  /* Need-level dots: red / yellow / green. Always shown next to the word, so color is never the only signal. */
+  --color-need-high: #dc2626;
+  --color-need-medium: #eab308;
+  --color-need-low: #16a34a;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --font-sans: var(--font-plex-sans);
@@ -35,7 +37,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Blue is for headings, the primary button and the "with support" bars; everything
+/* Blue is for headings and the primary button; everything
    else stays neutral. In the base layer so a text-* utility on a heading still wins. */
 @layer base {
   h1,

@@ -13,7 +13,7 @@ const TOP = 10;
 const MAX_BARRIERS = 2;
 
 /** Color plus the word, so need never relies on color alone. */
-const tierDot: Record<Tier, string> = { High: "bg-bad", Medium: "bg-warn", Low: "bg-muted" };
+const tierDot: Record<Tier, string> = { High: "bg-need-high", Medium: "bg-need-medium", Low: "bg-need-low" };
 
 /** A short version of a barrier's reason for the collapsed row, e.g. "91-minute bus trip each way". */
 function shortReason(reason: string): string {
@@ -191,7 +191,7 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
                     </td>
                     <td className="whitespace-nowrap py-2.5 pr-3">
                       <span className="inline-flex items-center gap-1.5">
-                        <span aria-hidden className={`h-2 w-2 rounded-full ${tierDot[p.tier]}`} />
+                        <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${tierDot[p.tier]}`} />
                         {p.tier}
                       </span>
                       <span className="ml-3 text-muted">{p.points} of {p.maxPoints}</span>
