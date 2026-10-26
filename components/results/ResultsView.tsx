@@ -1,11 +1,11 @@
 "use client";
 
 import { CaretRight } from "@phosphor-icons/react/dist/ssr";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Assumptions } from "@/lib/assumptions";
 import { simulateSupports, summarizeGroups } from "@/lib/scoring/simulate";
 import { buildSummary } from "@/lib/scoring/summary";
-import type { GroupBy, GroupSummary, Patient, Scenario, TrialInfo, VisitSchedule } from "@/lib/types";
+import type { GroupBy, GroupSummary, Patient, Scenario, SupportKey, TrialInfo, VisitSchedule } from "@/lib/types";
 import { GROUP_BYS, SUPPORT_KEYS } from "@/lib/types";
 import { ico } from "@/components/shell/icons";
 import { Card } from "@/components/shell/ui";
@@ -14,6 +14,7 @@ import { CostPanel } from "./CostPanel";
 import { GroupTable } from "./GroupTable";
 import { LimitationsBox } from "./LimitationsBox";
 import { SummaryCard } from "./SummaryCard";
+import { SupportImpact, type SupportChange } from "./SupportImpact";
 import { SupportList } from "./SupportList";
 import { SupportToggles } from "./SupportToggles";
 
@@ -45,6 +46,15 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
     [patients, sim],
   );
   const summary = useMemo(() => buildSummary(sim, assumptions), [sim, assumptions]);
+  const [change, setChange] = useState<SupportChange | null>(null);
+
+  // Re-scores the next scenario up front (pure and fast) so the switch can say what it did.
+  function toggleSupport(key: SupportKey, on: boolean) {
+    const next = { ...scenario, supports: { ...scenario.supports, [key]: on } };
+    const nextHigh = simulateSupports(schedule, patients, assumptions, SUPPORT_KEYS.filter((k) => next.supports[k])).result.tiersAfter.High;
+    setChange((c) => ({ key, on, delta: sim.result.tiersAfter.High - nextHigh, n: (c?.n ?? 0) + 1 }));
+    onScenario(next);
+  }
 
   return (
     <div className="space-y-6">
@@ -63,10 +73,8 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
       <SupportList patients={sim.before.patients} visitCount={sim.before.scoredVisits.length} />
 
       <Card title="Supports" subtitle="Turn on the supports you can offer. The group table and costs update.">
-        <SupportToggles scenario={scenario} onScenario={onScenario} />
-        <p className="mt-4">
-          High need: {sim.result.tiersBefore.High} patient{sim.result.tiersBefore.High === 1 ? "" : "s"} without support, {sim.result.tiersAfter.High} with.
-        </p>
+        <SupportToggles scenario={scenario} onToggle={toggleSupport} />
+        <SupportImpact before={sim.result.tiersBefore.High} after={sim.result.tiersAfter.High} change={change} />
       </Card>
 
       <GroupTable groups={groups} />

@@ -91,12 +91,24 @@ input[type="range"] {
   }
 }
 
+/* Results: the "with supports" high-need count rolls up into place when a
+   support switch changes it, like a counter ticking over. */
+.tm-tick {
+  display: inline-block;
+  transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+  @starting-style {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+}
+
 /* Reduced motion: keep the fades (they say "something new arrived"), drop the movement.
    More specific than the global * rule above, so these win over its 0.01ms. */
 @media (prefers-reduced-motion: reduce) {
   .tm-enter,
   .tm-pop,
-  .tm-fade {
+  .tm-fade,
+  .tm-tick {
     transition-property: opacity !important;
     transition-duration: 200ms !important;
   }
