@@ -8,6 +8,37 @@ import { ico } from "./icons";
 // Small shared building blocks. Keep these dumb; feature logic lives in the
 // coordinator/chw/agent folders.
 
+/**
+ * The pale blue wall band each screen opens on: title in the sign face, a breeze-block
+ * screen on the right. Full-bleed, so it sits outside the page container.
+ */
+export function WallBand({ title, lede, actions, size = "md" }: {
+  title: ReactNode;
+  lede?: ReactNode;
+  actions?: ReactNode;
+  size?: "lg" | "md";
+}) {
+  return (
+    <header className="relative overflow-hidden bg-wall">
+      <div aria-hidden className="breeze absolute inset-y-0 right-0 w-full opacity-60 [mask-image:linear-gradient(to_left,black_15%,transparent_75%)] md:w-[55%] md:opacity-100" />
+      <div className={`relative mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-x-8 gap-y-4 px-5 sm:px-8 ${size === "lg" ? "pb-10 pt-12 sm:pb-12 sm:pt-14" : "pb-8 pt-10"}`}>
+        <div className="max-w-[46rem]">
+          <h1 className={`font-sign text-balance ${size === "lg" ? "text-[clamp(2.1rem,4.6vw,3.5rem)] leading-[1.02]" : "text-[clamp(1.8rem,3.6vw,2.6rem)] leading-[1.05]"}`}>
+            {title}
+          </h1>
+          {lede && <div className={`mt-3 max-w-[60ch] ${size === "lg" ? "text-xl" : "text-lg"}`}>{lede}</div>}
+        </div>
+        {actions}
+      </div>
+    </header>
+  );
+}
+
+/** Page container below a WallBand. */
+export function Floor({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`mx-auto max-w-6xl px-5 sm:px-8 py-10 ${className}`}>{children}</div>;
+}
+
 export function Card({ title, subtitle, children, className = "", actions }: {
   title?: ReactNode;
   subtitle?: ReactNode;
@@ -20,7 +51,7 @@ export function Card({ title, subtitle, children, className = "", actions }: {
       {(title || actions) && (
         <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
-            {title && <h2 className="text-xl font-semibold tracking-tight">{title}</h2>}
+            {title && <h2 className="font-sign text-xl">{title}</h2>}
             {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
           </div>
           {actions}
@@ -84,11 +115,11 @@ export function Toggle({ checked, onChange, label, hint }: { checked: boolean; o
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left transition ${
-        checked ? "border-text/50" : "border-border hover:border-muted"
+      className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors duration-200 ${
+        checked ? "border-primary bg-surface-2" : "border-border bg-surface hover:border-muted"
       }`}
     >
-      <span aria-hidden className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? "bg-text" : "bg-border"}`}>
+      <span aria-hidden className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ${checked ? "bg-primary" : "bg-border"}`}>
         <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow-sm ring-1 ring-border transition-all ${checked ? "left-[22px]" : "left-0.5"}`} />
       </span>
       <span className="min-w-0 flex-1">
@@ -106,8 +137,8 @@ export function Chip({ pressed, onClick, children }: { pressed: boolean; onClick
       type="button"
       aria-pressed={pressed}
       onClick={onClick}
-      className={`min-h-11 rounded-md border px-3 text-sm font-medium transition active:scale-[0.98] ${
-        pressed ? "border-text bg-text text-surface" : "border-border hover:border-muted"
+      className={`min-h-11 rounded-full border px-4 text-sm font-semibold transition active:scale-[0.98] ${
+        pressed ? "border-text bg-text text-surface" : "border-border bg-surface hover:border-muted"
       }`}
     >
       {children}
@@ -121,11 +152,11 @@ export function Button({ children, variant = "secondary", className = "", ...pro
   const styles =
     variant === "primary"
       ? "bg-primary text-on-primary enabled:hover:bg-primary-hover enabled:active:bg-primary-hover"
-      : "border border-border bg-surface text-text hover:border-muted";
+      : "border border-border bg-surface text-text hover:border-text";
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold transition enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 font-semibold transition enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
       {...props}
     >
       {children}

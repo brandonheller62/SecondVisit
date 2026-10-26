@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Archivo, IBM_Plex_Mono } from "next/font/google";
 import { IntroSplash } from "@/components/shell/IntroSplash";
 import "./globals.css";
 
-// IBM Plex Sans for text, Plex Mono for patient IDs and raw tool output: one
-// family designed as a pair, with true tabular figures for the numbers.
-const plexSans = IBM_Plex_Sans({
-  variable: "--font-plex-sans",
+// Archivo carries both voices: heavy for headings (the nav wordmark alone is
+// stretched wider, like a Miami Modern sign), regular for the UI text. Plex Mono stays for patient IDs
+// and raw tool output, where character alignment matters.
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  axes: ["wdth"],
 });
 
 const plexMono = IBM_Plex_Mono({
@@ -29,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${plexSans.variable} ${plexMono.variable} font-sans antialiased`}>
+      <body className={`${archivo.variable} ${plexMono.variable} font-sans antialiased`}>
         <IntroSplash />
         {children}
       </body>

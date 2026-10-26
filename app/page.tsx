@@ -62,7 +62,8 @@ export default function Home() {
       <div className="sticky top-0 z-30">
         <TopNav tab={tab} onTab={setTab} enabled={enabled} subtitle={run.trial ? sentenceCase(run.trial.title) : undefined} />
       </div>
-      <main id="main" className="mx-auto max-w-7xl px-4 py-8">
+      {/* Each screen opens on a full-bleed WallBand and sets its own container below it. */}
+      <main id="main">
         {tab === "start" && (
           <StartPanel
             nctId={nctId}

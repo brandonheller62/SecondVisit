@@ -8,7 +8,7 @@ import { buildSummary } from "@/lib/scoring/summary";
 import type { GroupBy, GroupSummary, Patient, Scenario, SupportKey, TrialInfo, VisitSchedule } from "@/lib/types";
 import { GROUP_BYS, SUPPORT_KEYS } from "@/lib/types";
 import { ico } from "@/components/shell/icons";
-import { Card } from "@/components/shell/ui";
+import { Card, Floor, WallBand } from "@/components/shell/ui";
 import { AssumptionsPanel } from "./AssumptionsPanel";
 import { CostPanel } from "./CostPanel";
 import { GroupTable } from "./GroupTable";
@@ -57,16 +57,18 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
   }
 
   return (
-    <div className="space-y-6">
-
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Results</h1>
-        <p className="mt-1 text-muted">
+    <>
+    <WallBand
+      title="Results"
+      lede={
+        <p>
           {patients.length} synthetic patients, {sim.before.scoredVisits.length} visits{trial ? ` (${trial.nctId})` : ""}. Numbers are estimates from adjustable guesses, not predictions.
           {replay && " Replay of a previous run."}
           {exampleSchedule && " Uses an example schedule, not the registry's."}
         </p>
-      </div>
+      }
+    />
+    <Floor className="space-y-10">
 
       <SummaryCard summary={summary} />
 
@@ -82,10 +84,10 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
       <LimitationsBox />
 
       <details className="group border-t border-border pt-4">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-xl font-semibold [&::-webkit-details-marker]:hidden">
+        <summary className="font-sign flex min-h-11 cursor-pointer list-none items-center gap-2 text-xl text-primary [&::-webkit-details-marker]:hidden">
           <CaretRight {...ico} className={`${ico.className} transition-transform group-open:rotate-90`} />
           Advanced
-          <span className="text-sm font-normal text-muted">Assumptions and costs</span>
+          <span className="font-sans text-sm font-normal [font-stretch:100%] text-muted">Assumptions and costs</span>
         </summary>
         <div className="mt-4 space-y-8">
           {sim.before.unknownNotes.length > 0 && (
@@ -99,6 +101,7 @@ export function ResultsView({ trial, schedule, patients, assumptions, onAssumpti
           <CostPanel result={sim.result} assumptions={assumptions} onAssumptions={onAssumptions} />
         </div>
       </details>
-    </div>
+    </Floor>
+    </>
   );
 }

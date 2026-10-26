@@ -36,7 +36,7 @@ export function IntroSplash() {
         <path className="tm-snake" pathLength={1} d="M14.75 10.25c0 1.75-5.5 1.75-5.5 3.5s5.5 1.75 5.5 3.5c0 1.25-1.25 2-2.75 2.25" />
         <path className="tm-wings" pathLength={1} d="M12 7.75c-3.75.75-7.5-.75-9.25-4c3.5-.5 6.75.25 9.25 2Zm0 0c3.75.75 7.5-.75 9.25-4c-3.5-.5-6.75.25-9.25 2Z" />
       </svg>
-      <div className="tm-intro-word text-3xl font-bold tracking-tight">
+      <div className="tm-intro-word font-sign text-4xl uppercase">
         Second <span className="text-primary">Visit</span>
       </div>
     </div>

@@ -8,6 +8,7 @@ const tabs: { id: Tab; label: string; short: string }[] = [
   { id: "results", label: "3. Results", short: "Results" },
 ];
 
+/** The blue canopy: the sign wordmark on the left, the three steps as pills on the right. */
 export function TopNav({ tab, onTab, enabled, subtitle }: {
   tab: Tab;
   onTab: (t: Tab) => void;
@@ -15,20 +16,20 @@ export function TopNav({ tab, onTab, enabled, subtitle }: {
   subtitle?: string;
 }) {
   return (
-    <nav aria-label="Main" className="border-b border-border bg-surface">
+    <nav aria-label="Main" className="bg-primary text-on-primary">
       {/* One row at every width: the brand never wraps and the trial title truncates, so the sticky header stays short. */}
-      <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-1.5 sm:gap-6 sm:py-2">
-        <div className="flex shrink-0 items-baseline gap-3 lg:min-w-0 lg:flex-1 lg:shrink">
-          <span className="shrink-0 whitespace-nowrap text-lg font-bold tracking-tight sm:text-2xl">
-            Second Visit
+      <div className="mx-auto flex max-w-6xl items-center gap-2 px-5 py-2 sm:px-8 sm:gap-6">
+        <div className="flex shrink-0 items-baseline gap-4 lg:min-w-0 lg:flex-1 lg:shrink">
+          <span className="font-sign shrink-0 whitespace-nowrap text-base uppercase [font-stretch:115%] sm:text-xl">
+            Second <span className="text-sky">Visit</span>
           </span>
           {subtitle && (
-            <span className="hidden min-w-0 truncate text-sm text-muted md:block" title={subtitle}>
+            <span className="hidden min-w-0 truncate text-sm text-canopy-muted md:block" title={subtitle}>
               {subtitle}
             </span>
           )}
         </div>
-        <ul className="ml-auto flex min-w-0 overflow-x-auto sm:gap-1 lg:shrink-0">
+        <ul className="ml-auto flex min-w-0 gap-1 overflow-x-auto lg:shrink-0">
           {tabs.map((t) => {
             const active = tab === t.id;
             return (
@@ -38,8 +39,8 @@ export function TopNav({ tab, onTab, enabled, subtitle }: {
                   disabled={!enabled[t.id]}
                   aria-current={active ? "page" : undefined}
                   onClick={() => onTab(t.id)}
-                  className={`min-h-11 min-w-11 whitespace-nowrap rounded-md px-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40 sm:px-3 sm:text-base ${
-                    active ? "bg-surface-2 font-semibold text-text" : "text-muted hover:bg-surface-2 hover:text-text"
+                  className={`min-h-11 min-w-11 whitespace-nowrap rounded-full px-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:text-base ${
+                    active ? "bg-surface text-primary" : "text-wall enabled:hover:bg-primary-hover enabled:hover:text-on-primary"
                   }`}
                 >
                   <span className="sm:hidden">{t.short}</span>

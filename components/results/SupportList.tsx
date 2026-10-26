@@ -14,6 +14,8 @@ const MAX_BARRIERS = 2;
 
 /** Color plus the word, so need never relies on color alone. */
 const tierDot: Record<Tier, string> = { High: "bg-need-high", Medium: "bg-need-medium", Low: "bg-need-low" };
+// Each row's first and last cells get the table's inner gutter.
+const edge = "[&>td:first-child]:pl-4 [&>td:last-child]:pr-4";
 
 /** A short version of a barrier's reason for the collapsed row, e.g. "91-minute bus trip each way". */
 function shortReason(reason: string): string {
@@ -154,10 +156,10 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
         {visit && <p>Barriers are at the {visit} visit unless noted.</p>}
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-xl border border-border bg-surface">
         <table className="w-full min-w-[720px] text-left">
           <caption className="sr-only">Patients ranked by need for support to stay in the trial. Select a patient for details.</caption>
-          <thead className="text-sm text-muted">
+          <thead className="bg-surface-2 text-xs uppercase tracking-wider text-muted [&_th:first-child]:pl-4 [&_th:last-child]:pr-4">
             <tr className="border-b border-border">
               <th scope="col" className="py-2 pr-3 font-medium">Rank and patient</th>
               <th scope="col" className="py-2 pr-3 font-medium">Need · score</th>
@@ -172,7 +174,7 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
               const detailsId = `support-details-${p.patientId}`;
               return (
                 <Fragment key={p.patientId}>
-                  <tr className={`cursor-pointer align-top hover:bg-surface-2 ${isOpen ? "" : "border-b border-border"}`} onClick={() => toggle(p.patientId)}>
+                  <tr className={`cursor-pointer align-top transition-colors hover:bg-bg ${edge} ${isOpen ? "" : "border-b border-border last:border-b-0"}`} onClick={() => toggle(p.patientId)}>
                     <td className="py-2.5 pr-3">
                       <button
                         type="button"
@@ -185,13 +187,13 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
                         className="flex items-center gap-2 whitespace-nowrap rounded-md text-left"
                       >
                         <CaretRight {...ico} className={`${ico.className} text-muted transition-transform duration-150 ${isOpen ? "rotate-90" : ""}`} />
-                        <span className="w-6 text-right text-muted">{rank.get(p.patientId)}</span>
+                        <span className="font-sign w-7 text-right text-muted">{rank.get(p.patientId)}</span>
                         <span className="font-mono font-medium">{p.patientId}</span>
                       </button>
                     </td>
                     <td className="whitespace-nowrap py-2.5 pr-3">
                       <span className="inline-flex items-center gap-1.5">
-                        <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${tierDot[p.tier]}`} />
+                        <span aria-hidden className={`h-3 w-3 rounded-[3px] ${tierDot[p.tier]}`} />
                         {p.tier}
                       </span>
                       <span className="ml-3 text-muted">{p.points} of {p.maxPoints}</span>
@@ -213,7 +215,7 @@ export function SupportList({ patients, visitCount }: { patients: PatientScore[]
                     </td>
                   </tr>
                   {isOpen && (
-                    <tr id={detailsId} className="border-b border-border bg-surface-2/50">
+                    <tr id={detailsId} className={`border-b border-border bg-surface-2 ${edge}`}>
                       <td colSpan={4}>
                         <Details p={p} visit={visit} visits={visitCount} />
                       </td>

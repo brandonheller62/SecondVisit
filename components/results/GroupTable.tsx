@@ -37,10 +37,10 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
         </div>
       }
     >
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-xl border border-border bg-surface">
         <table className="w-full min-w-[520px] text-left">
           <caption className="sr-only">Completion by {LABEL[by].toLowerCase()}</caption>
-          <thead className="text-sm text-muted">
+          <thead className="bg-surface-2 text-xs uppercase tracking-wider text-muted [&_th:first-child]:pl-4 [&_th:last-child]:pr-4">
             <tr className="border-b border-border">
               <th scope="col" className="py-2 pr-3 font-medium">{LABEL[by]}</th>
               <th scope="col" className="py-2 pr-3 font-medium">People</th>
@@ -51,7 +51,7 @@ export function GroupTable({ groups }: { groups: Record<GroupBy, GroupSummary> }
           </thead>
           <tbody>
             {g.rows.map((r) => (
-              <tr key={r.group} className="border-b border-border/60">
+              <tr key={r.group} className="border-b border-border/60 last:border-b-0 [&>*:first-child]:pl-4 [&>*:last-child]:pr-4">
                 <th scope="row" className="py-2 pr-3 font-medium">{r.group}</th>
                 {r.suppressed ? (
                   <td colSpan={4} className="py-2 italic text-muted">{TOO_SMALL}</td>

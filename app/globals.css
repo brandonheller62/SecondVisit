@@ -2,43 +2,53 @@
 
 /* `static` emits every token as a CSS variable. */
 @theme static {
-  /* White, neutral grays and one deep blue accent. Every color in the app comes from these tokens. */
-  --color-bg: #ffffff;
+  /* Blue and white, laid out in the Miami Modern structure: navy ink, pale blue wall bands,
+     one deep blue for the canopy and actions. Every color in the app comes from these tokens. */
+  --color-bg: #f5f8fc; /* the floor */
   --color-surface: #ffffff;
-  --color-surface-2: #f4f7fb;
-  --color-border: #e3eaf3;
-  --color-text: #1a1a1a;
-  --color-muted: #4a5568;
+  --color-surface-2: #eaf1fa;
+  --color-wall: #dce8f6; /* pale blue bands behind page titles */
+  --color-border: #d3deec;
+  --color-text: #10233f;
+  --color-muted: #4a5a70;
   --color-primary: #1e4a80;
   --color-primary-hover: #163a66;
   --color-on-primary: #ffffff;
-  /* Status colors, darkened so their text passes WCAG AA on white and on their own tints. */
+  --color-canopy-muted: #b9cde6; /* secondary text on the blue canopy */
+  --color-sky: #9cc0ee; /* the wordmark highlight on the canopy */
+  /* Status colors, darkened so their text passes WCAG AA on white and on the floor. */
   --color-ok: #166534;
   --color-warn: #92400e;
   --color-bad: #b91c1c;
-  /* Need-level dots: red / yellow / green. Always shown next to the word, so color is never the only signal. */
+  /* Need-level tiles: red / yellow / green. Always shown next to the word, so color is never the only signal. */
   --color-need-high: #dc2626;
   --color-need-medium: #eab308;
   --color-need-low: #16a34a;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --font-sans: var(--font-plex-sans);
+  --font-sans: var(--font-archivo);
   --font-mono: var(--font-plex-mono);
 }
 
 html {
   font-size: 18px;
   color-scheme: light;
+  scrollbar-color: var(--color-canopy-muted) var(--color-bg);
 }
 
 body {
   background: var(--color-bg);
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
+  caret-color: var(--color-primary);
 }
 
-/* Blue is for headings and the primary button; everything
-   else stays neutral. In the base layer so a text-* utility on a heading still wins. */
+::selection {
+  background: var(--color-wall);
+  color: var(--color-text);
+}
+
+/* Headings share the blue ink. In the base layer so a text-* utility on a heading still wins. */
 @layer base {
   h1,
   h2,
@@ -47,8 +57,31 @@ body {
   }
 }
 
+/* The sign face: Archivo at normal width and heavy weight. The nav wordmark alone
+   widens it (115%), like a MiMo hotel sign; long headings stay compact. */
+@utility font-sign {
+  font-family: var(--font-archivo);
+  font-stretch: 100%;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+/* Breeze-block screen: the pierced concrete block of 1950s Miami, drawn as a repeating tile.
+   Sits on the wall bands only, behind the page title. */
+@utility breeze {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64' fill='none' stroke='%23ffffff' stroke-width='3'%3E%3Crect x='2' y='2' width='60' height='60' rx='4'/%3E%3Ccircle cx='32' cy='32' r='19'/%3E%3Ccircle cx='0' cy='0' r='10'/%3E%3Ccircle cx='64' cy='0' r='10'/%3E%3Ccircle cx='0' cy='64' r='10'/%3E%3Ccircle cx='64' cy='64' r='10'/%3E%3C/svg%3E");
+  background-size: 64px 64px;
+}
+
+/* Terrazzo floor chips for the footer: flat flecks in the palette's blues. */
+@utility terrazzo {
+  background-color: var(--color-surface-2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg opacity='.55'%3E%3Cpath d='M18 22l9-4 4 8-8 5z' fill='%231e4a80'/%3E%3Cpath d='M96 14l12 3-3 9-11-2z' fill='%236f9bd1'/%3E%3Cpath d='M170 40l7 7-6 6-8-5z' fill='%239cc0ee'/%3E%3Cpath d='M52 88l10 1 1 8-11 1z' fill='%233d6aa6'/%3E%3Cpath d='M140 104l6-6 9 4-5 8z' fill='%231e4a80'/%3E%3Cpath d='M200 130l8 3-2 8-9-3z' fill='%236f9bd1'/%3E%3Cpath d='M26 160l9 6-5 7-8-6z' fill='%239cc0ee'/%3E%3Cpath d='M110 176l11-2 2 7-10 3z' fill='%236f9bd1'/%3E%3Cpath d='M176 196l5-7 7 5-6 6z' fill='%233d6aa6'/%3E%3Cpath d='M76 46l4 2-1 4-4-1z' fill='%233d6aa6'/%3E%3Cpath d='M160 160l4 1 0 4-4 0z' fill='%231e4a80'/%3E%3Cpath d='M60 206l4 2-2 4-4-2z' fill='%231e4a80'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
 :focus-visible {
-  outline: 3px solid var(--color-text);
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -125,7 +158,7 @@ input[type="range"] {
   place-content: center;
   justify-items: center;
   gap: 1.25rem;
-  background: var(--color-bg);
+  background: var(--color-wall);
   cursor: pointer;
   animation: tm-intro-out 300ms var(--ease-out) 1250ms forwards;
 }
