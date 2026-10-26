@@ -16,6 +16,26 @@ People who qualify for a trial still drop out when visits clash with night shift
 
 **The score decides who gets help first. It is never used to exclude, deprioritize or reject anyone.** It never decides medical eligibility and gives no medical advice.
 
+## Demo
+
+Screens from a real run on the diabetes/fatty-liver demo trial (NCT05232071) with the 120 sample patients. All patients are synthetic.
+
+**1. Start.** Pick a trial and a patient list.
+
+![Start: pick a trial and load the sample patients](docs/screenshots/1-start.jpg)
+
+**2. Agent run.** Each tool call streams in as one plain sentence: fetch the trial, read the visit schedule, check the patient list, rank patients, try supports, break results down by group. Claude closes with a short summary.
+
+![Agent run: the steps stream in as the agent works](docs/screenshots/2-agent-run.jpg)
+
+**3. Results.** The summary is written in code from the numbers, not by the model. Below it, the ranked support list shows who to offer help first and why.
+
+![Results: summary and ranked support list](docs/screenshots/3-results.jpg)
+
+**4. Supports.** Turn supports on and off. Each switch says what it did for the people at high need, and the group table updates.
+
+![Supports: adding evening visits moves 7 patients out of high need](docs/screenshots/4-supports.jpg)
+
 ## Stack
 
 Next.js 15 (App Router) + TypeScript + Tailwind 4. Anthropic SDK (`@anthropic-ai/sdk`) for the agent, called from server routes only. Vitest for unit tests. No database.
