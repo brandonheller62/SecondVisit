@@ -1,4 +1,4 @@
-# Second Visit — YCI Hackathon, Oct 25, 2026
+# Second Visit
 
 > A retention-support agent for clinical trial teams in Miami-Dade: it reads a real trial's visit schedule, scores the barriers each already-eligible patient would face at the trial's visits, and ranks who should be offered support first.
 
