@@ -8,7 +8,6 @@ Miami AI-agent hackathon · Health & Wellbeing track.
 
 - Brandon Heller
 - Girish Raju
-- Mateo Gomez-Peck
 
 ## The idea
 
